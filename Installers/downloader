@@ -47,4 +47,3 @@ if side ~= nil then
     else
     print("No disk was found.")
 end
-fs.delete("installer")
