@@ -1,0 +1,5 @@
+os.loadAPI("coreNetwork")
+coreNetwork.login()
+hosts = coreNetwork.getHosts()
+for key,value in pairs(hosts) do print(value["name"]) end
+coreNetwork.logout()

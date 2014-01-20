@@ -1,0 +1,49 @@
+function Split(str, delim)
+    local result = {}
+    local pos = string.find(str, delim)
+    if pos ~= nil then
+    result["succes"] = true
+    result[0] = string.sub(str,0,pos-1)
+    result[1] = string.sub(str,pos+1)
+    else
+    result["succes"] = false
+    end 
+    return result
+end
+
+function loadConfig(filename, debugout)
+local f = assert(io.open(filename, "r"))
+local settings = {}
+ for line in f:lines() do
+ if string.sub(line,0,1) ~= "/" then
+ decoded = Split(line,'=')
+if decoded["succes"] then
+ settings[decoded[0]] = decoded[1]
+ if debugout then 
+ print("Loaded config: "..decoded[0].." Value: "..decoded[1])
+ end
+ else
+ if debugout then 
+ print("Error in line: "..line)
+ end
+ end
+ end
+ end
+    f:close()
+    return settings
+end
+
+function deepcopy(orig)
+    local orig_type = type(orig)
+    local copy
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+        end
+        setmetatable(copy, deepcopy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end

@@ -1,0 +1,227 @@
+function file_exists(name)
+    local f = io.open(name,"r")
+    if f~= nil then 
+        io.close(f)
+        return true
+        else
+        return false
+    end
+end
+
+function switch(w1,w2)
+    return (string.sub(w2,1,1) ~= "/")
+end
+
+function buildProgram()
+    print("Building program list...")
+    return fs.list("install")
+end
+
+function table.contains(table, element)
+  for _, value in pairs(table) do
+    if value == element then
+      return true
+    end
+  end
+  return false
+end
+
+function getFile(path)
+    return string.match(path, "(.-)([^\\/]-%.?([^%.\\/]*))$")
+end
+
+function handleNew()
+    sleep(0.5)
+    local location = nil
+        local deps = {}
+        local name = nil
+        while true do
+        print("Program location?")
+        location = read()
+        folder, name = getFile(location)
+        if file_exists(location) and not table.contains(myPrograms, name) then break end
+        end
+        while true do
+        print("Dependencies? (leave empty when done)")
+        local dep = read()    
+        if table.contains(myPrograms,dep) then
+            table.insert(deps,dep)
+        end
+        if dep == nil or dep == "" then break end
+        end
+        print("Add program: "..location)
+        print("With dependencies:")
+        for i,v in ipairs(deps) do print(v) end
+        print("To the the database? (y/n)")        
+        repeat
+        input = read()
+        until input == "y" or input == "Y" or input == "n" or input == "N"
+        if input == "y" or input == "Y" then
+        print("Copying file..")
+        fs.copy(location, "programs/"..name)
+        print("Making install fill..")
+        deps["version"] = 1
+        local f = assert(io.open("install/"..name, "w"))
+        f:write(textutils.serialize(deps))
+        f:close()
+        print("Done, reloading myPrograms list")
+        myPrograms = buildProgram()
+        end
+end
+
+function handleUpdate()
+    sleep(0.5)
+    local location = nil
+    local deps = {}
+    local name = nil
+    while true do
+    print("Program location?")
+    location = read()
+    folder, name = getFile(location)
+    if file_exists(location) then break end
+    end
+    local dep_changed = nil
+    repeat
+    print("Modify dependencies? (y/n)")
+    dep_changed = read()
+    until dep_changed == "y" or dep_changed == "Y" or dep_changed == "n" or dep_changed == "N" 
+    while dep_changed == "y" or dep_changed == "Y" do
+        print("Dependencies? (leave empty when done)")
+        local dep = read()    
+        if table.contains(myPrograms,dep) then
+            table.insert(deps,dep)
+        end
+        if dep == nil or dep == "" then break end
+        end
+        local f = fs.open("install/"..name, "r")
+        local text = f.readLine()
+        f.close()
+        local old = textutils.unserialize(text)
+        if dep_changed == "y" or dep_changed == "Y" then
+            deps["version"] = old["version"] + 1
+            else 
+            deps = old
+            deps["version"] = deps["version"] + 1
+        end
+        print("Add program: "..location)
+        print("With dependencies:")
+        for i,v in ipairs(deps) do print(v) end
+        print("To the the database? (y/n)")
+        repeat
+        input = read()
+        until input == "y" or input == "Y" or input == "n" or input == "N"
+        if input == "y" or input == "Y" then
+        print("Updating file..")
+        fs.delete("programs/"..name)
+        fs.copy(location, "programs/"..name)
+        print("Updating install file..")
+        local f = assert(io.open("install/"..name, "w"))
+        f:write(textutils.serialize(deps))
+        f:close()
+        print("Done, reloading myPrograms list")
+        myPrograms = buildProgram()
+        end
+end
+
+function addDeps(program, tabel)
+    local f = fs.open("install/"..program,"r")
+    local text = f.readLine()
+    f.close()
+    local data = textutils.unserialize(text)
+    for i,v in ipairs(data) do 
+        if i ~= "version" then
+            addDeps(v,tabel)
+            tabel[#tabel+1] = v
+        end        
+    end    
+end
+
+os.loadAPI("coreNetwork")
+coreNetwork.login()
+
+if not fs.exists("programs") then fs.makeDir("programs") end
+if not fs.exists("install") then fs.makeDir("install") end
+print("Repo server running. Name: "..os.getComputerLabel())
+myPrograms = buildProgram()
+print("Programs loaded: "..table.getn(myPrograms))
+print("Server is running, press n for a new program, press u to update a program or l for the list programs")
+while true do
+    event, message, sender, target = coreNetwork.pullEvent()
+    if event == "network_message" then
+        local temp = textutils.unserialize(message)
+        if temp["option"] == "get" then
+            if table.contains(myPrograms, temp["name"]) then
+                local data = {}
+                local program = {}
+                local f = io.open("programs/"..temp["name"],"r")
+                for line in f:lines() do
+                    table.insert(program,line)
+                end
+                f:close()
+                data["succes"] = true
+                data["program"] = program
+                f = fs.open("install/"..temp["name"],"r")
+                local version = textutils.unserialize(f.readLine())
+                f.close()
+                data["version"] = version["version"]
+                coreNetwork.sendMessage(sender, textutils.serialize(data))
+                print("Sending "..temp["name"])
+            else
+                local data = {}
+                data["succes"] = false
+                coreNetwork.sendMessage(sender, textutils.serialize(data))
+            end
+        elseif temp["option"] == "update" then
+            if table.contains(myPrograms, temp["name"]) then
+                local f = fs.open("install/"..temp["name"], "r")
+                local text = f.readLine()
+                f.close()
+                local version = textutils.unserialize(text)
+                if version["version"] == temp["version"] then
+                local data = {}
+                data["result"] = "Most recent version."
+                coreNetwork.sendMessage(sender, textutils.serialize(data))
+                else
+                local data = {}
+                local program = {}
+                local f = io.open("programs/"..temp["name"],"r")
+                for line in f:lines() do
+                    table.insert(data,line)
+                end
+                f:close()
+                data["result"] = "New version"
+                data["program"] = program
+                data["version"] = version["version"]
+                coreNetwork.sendMessage(sender, textutils.serialize(data))
+                end
+            else
+                local data = {}
+                data["result"] = "Not here"
+                coreNetwork.sendMessage(sender, textutils.serialize(data))
+            end
+        elseif temp["option"] == "hasFile" then
+            local data = {}
+            if table.contains(myPrograms, temp["name"]) then
+                data["has"] = true
+                local deps = {}
+                deps[1] = temp["name"]
+                addDeps(temp["name"],deps)
+                data["files"] = deps
+            else
+                data["has"] = false
+            end
+            coreNetwork.sendMessage(sender,textutils.serialize(data))
+        else
+            print("not a valid input received")
+        end
+    end
+    if event == "key" then --n = 49, u == 22
+        if message == 49 then handleNew() end
+        if message == 22 then handleUpdate() end
+        if message == 38 then
+            for i,v in ipairs(myPrograms) do print(v) end
+        end
+    end
+end
+
+coreNetwork.logout()

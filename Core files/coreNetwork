@@ -1,0 +1,127 @@
+--loading core utils
+os.loadAPI("coreUtils")
+
+--loading config in network folder
+local settings = coreUtils.loadConfig("network/settings", false)
+
+--setting up modem
+local modem = peripheral.wrap(settings["side"])
+if settings["port"] == "" then settings["port"] = os.getComputerID() end
+if settings["port"] == nil then settings["port"] = os.getComputerID() end
+
+settings["port"] = tonumber(settings["port"])
+modem.open(settings["port"])
+local dhcpPort = 1
+
+if modem.isWireless() then
+ if settings["ssid"] ~= nil then
+print("Enabling wireless modem on ssid: "..settings["ssid"])
+dhcpPort = tonumber(settings["ssid"])
+else
+print("Wireless ssid not set")
+end
+end
+
+NextLoggedIn = false
+loggedIN = false
+waiting = false
+
+function login()
+ local host_data = {}
+ if os.getComputerLabel() ~= "" then
+    host_data["name"] = os.getComputerLabel()
+    host_data["port"] = settings["port"]
+    timerID = os.startTimer(2)
+    waiting = true
+    NextLoggedIn = true
+    modem.transmit(dhcpPort, settings["port"], "login:"..textutils.serialize(host_data))
+    while waiting do pullEvent() end    
+    return (loggedIN == true)    
+end
+ return false
+end
+
+function logout()
+local host_data = {}
+ if os.getComputerLabel() ~= "" then
+ host_data["name"] = os.getComputerLabel()
+ host_data["port"] = settings["port"]
+ timerID = os.startTimer(2)
+ waiting = true
+ modem.transmit(dhcpPort,settings["port"],"logout:"..textutils.serialize(host_data))
+ while waiting do pullEvent() end
+  loggedIN = false
+  return true 
+end
+ return false
+end
+
+function getHosts()
+if loggedIN then
+waiting = true
+timerID = os.startTimer(2)
+modem.transmit(dhcpPort,settings["port"],"hosts:")
+while waiting do hosts = pullEvent() end
+return hosts
+end
+end
+
+function sendMessage(host, message)
+if loggedIN then
+local data = {}
+data["host"] = host
+data["message"] = message
+data["sender"] = os.getComputerLabel()
+waiting = true
+modem.transmit(dhcpPort,settings["port"],"message:"..textutils.serialize(data))
+while waiting do succes = pullEvent() end
+return succes
+end
+end
+
+function pullEvent()
+while true do
+event, a, b, c, d, e = os.pullEvent() 
+if event == "modem_message" then
+    if c == dhcpPort then
+        local dec_message = {}
+        dec_message = coreUtils.Split(d,':')
+    if dec_message["succes"] then
+        if dec_message[0] == "message" then
+           data = textutils.unserialize(dec_message[1])
+           return "network_message", data["message"], data["sender"], data["host"] 
+        end
+        if dec_message[0] == "handshake" then
+            if dec_message[1] == "true" then
+                loggedIN = coreUtils.deepcopy(NextLoggedIn)
+            else
+                loggedIN = false
+            end
+            waiting = false
+            return true
+        end
+        if dec_message[0] == "hosts" then
+            waiting = false
+            return textutils.unserialize(dec_message[1])
+        end
+        if dec_message[0] == "received" then
+            waiting = false
+            return (dec_message[1] == "true")
+        end
+    else
+        print("Unexpected message: "..d)
+    end
+    elseif settings["raise"] == "true" then
+        return "modem_message",a,b,c,d,e
+    end
+elseif event == "timer" and a == timerID then
+    if waiting then
+        print("No response. Is DHCP offline?")
+        waiting = false
+        return false
+    end
+else
+return event, a, b, c, d, e
+end
+end
+end

@@ -1,0 +1,79 @@
+--loading core utils
+os.loadAPI("coreUtils")
+
+--loading config in network folder
+local settings = coreUtils.loadConfig("network/settings", true)
+
+--Hosts file, contains all the registerd hosts
+hosts = {}
+
+--setting the computerlabel to DHCP
+os.setComputerLabel("DHCP")
+
+--setting up modem
+local modem = peripheral.wrap(settings["side"])
+modem.open(1)
+
+function newHost(data)
+if hosts[data["name"]] == nil then
+hosts[data["name"]] = {}
+hosts[data["name"]] = data
+return true
+end
+return false
+end
+
+function removeHost(data)
+if hosts[data["name"]] ~= nil then
+hosts[data["name"]] = nil
+return true
+end
+return false
+end
+
+while true do
+local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent("modem_message")
+local dec_message = coreUtils.Split(message,':')
+    if dec_message["succes"] then
+        if dec_message[0] == "login" then
+            local host_data = textutils.unserialize(dec_message[1])
+            local succes = newHost(host_data)
+            if succes then
+                modem.transmit(replyChannel,1, "handshake:"..tostring(succes))
+                print("New host: "..host_data["name"])
+            else
+                if senderID == hosts[host_data["name"]]["id"] then
+                    modem.transmit(replyChannel,1, "handshake:true")
+                else
+                    modem.transmit(replyChannel,1, "handshake:false")
+                end
+            end
+        elseif dec_message[0] == "logout" then
+            local host_data = textutils.unserialize(dec_message[1])
+            local succes = removeHost(host_data)
+            modem.transmit(replyChannel,1,"handshake:true")
+            if succes then                
+                print("Removing host: "..host_data["name"])
+            else                
+                print("Removing host: "..host_data["name"].." failed")
+            end
+        elseif dec_message[0] == "hosts" then
+            modem.transmit(replyChannel,1,"hosts:"..textutils.serialize(hosts))
+        elseif dec_message[0] == "message" then
+            local data = textutils.unserialize(dec_message[1])
+            if (data["sender"] ~= nil and data["message"] ~= nil and data["host"] ~= nil) then
+            print("Incoming message from: "..data["sender"].." to "..data["host"])
+            if hosts[data["host"]] ~= nil then
+                modem.transmit(tonumber(hosts[data["host"]]["port"]),1,message)
+                modem.transmit(replyChannel,1, "received:true")
+            else
+                modem.transmit(replyChannel,1, "received:false")
+            end
+            else
+                modem.transmit(replyChannel,1, "received:false")
+            end
+        end
+    else
+        print("Unexpected message: "..message)
+    end
+end

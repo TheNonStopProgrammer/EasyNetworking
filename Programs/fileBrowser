@@ -1,0 +1,222 @@
+function draw()
+    term.clear()
+    term.setCursorPos(1,1)
+    for i=range_min,range_max do 
+        if current_pos == i then
+            print(">"..list[i])
+            else
+            print(list[i]) 
+        end
+    end
+end
+
+function isDir(name)
+    return (string.sub(name,1,1) == "/")
+end
+
+function handle()
+    if current_pos == 1 then
+        index = nil
+        for i=string.len(working_dir),1,-1 do
+            if string.sub(working_dir,i,i) == "/" then
+                index = i
+                break
+            end
+        end
+        if index ~= nil then
+            working_dir = string.sub(working_dir,1,index-1)
+            else
+            working_dir = ""
+        end
+        coreNetwork.sendMessage(input,"ls:"..working_dir)
+        elseif current_pos == table.getn(list)-3 then
+        elseif current_pos == table.getn(list)-2 then
+        term.clear()
+        term.setCursorPos(1,1)
+        print("Folder name?")
+        local folder = read()
+        folder = working_dir.."/"..folder
+        if isDir(folder) then
+            folder = string.sub(folder,2)
+        end
+        coreNetwork.sendMessage(input,"mkdir:"..folder)
+        coreNetwork.sendMessage(input,"ls:"..working_dir)
+        elseif current_pos == table.getn(list)-1 then
+        term.clear()
+        term.setCursorPos(1,1)
+        print("Filename or type quit to return?")
+        local choice = nil
+        while choice == nil do
+            choice = read()
+            if choice == "quit" then
+                choice = nil
+                break
+            end
+            if not fs.exists(choice) or fs.isDir(choice) then
+                print("File does not exist.")
+                choice = nil
+            end
+        end
+        if choice ~= nil then
+            for i=string.len(choice),1,-1 do
+                if string.sub(choice,i,i) == "/" then
+                    index = i
+                    break
+                end
+            end
+            local file_upload = working_dir.."/"
+            if index ~= nil then
+                file_upload = file_upload..string.sub(choice,index+1)
+                else
+                file_upload = file_upload..choice
+            end            
+            if isDir(file_upload) then
+                file_upload = string.sub(file_upload,2)
+            end
+            local data = {}
+            local f = io.open(choice,"r")
+            for line in f:lines() do
+                table.insert(data,line)
+            end
+            f:close()
+            print("Uploading file to "..file_upload)
+            local packet = {}
+            packet["name"] = file_upload
+            packet["data"] = textutils.serialize(data)
+            coreNetwork.sendMessage(input, "post:"..textutils.serialize(packet))
+            sleep(1)
+            coreNetwork.sendMessage(input,"ls:"..working_dir)
+        end
+        elseif isDir(list[current_pos]) then
+        working_dir = working_dir..list[current_pos]
+        if isDir(working_dir) then
+            working_dir = string.sub(working_dir,2)
+        end
+        coreNetwork.sendMessage(input,"ls:"..working_dir)
+        else
+        local file = working_dir..list[current_pos]
+        if isDir(file) then
+            file = string.sub(file,2)
+        end
+        term.clear()
+        term.setCursorPos(1,1)
+        local file = working_dir..list[current_pos]
+        while file_download == nil do
+            print("Destination folder?")
+            file_download = read()
+            if not fs.isDir(file_download) then
+                print("Folder does not exist. Create it? [y,n]")
+                local choice = read()
+                if choice == "y" or choice == "yes" then
+                    fs.makeDir(file_download)
+                    else
+                    file_download = nil
+                end
+            end
+        end
+        file_download = file_download.."/"..list[current_pos]
+        if isDir(file_download) then
+            file_download = string.sub(file_download,2)
+        end
+        print("Getting: "..file)
+        print("Saving to: "..file_download)
+        sleep(1)
+        coreNetwork.sendMessage(input,"get:"..file)
+    end
+end
+
+os.loadAPI("coreNetwork")
+coreNetwork.login()
+term.clear()
+term.setCursorPos(1,1)
+file_download = nil
+print("Fileserver name: ")
+input = nil
+
+while input == nil do
+    input = read()
+    coreNetwork.sendMessage(input,"hello:")
+    os.startTimer(2)
+    event = nil
+    repeat
+        event, message = coreNetwork.pullEvent()
+        if message ~= "hi" then input = nil end
+        if event == "timer" then input = nil end
+    until event == "network_message" or event == "timer"
+end
+
+working_dir = ""
+local x,y = term.getSize()
+range_min = 1
+range_max = y-1
+current_pos = 1
+coreNetwork.sendMessage(input,"ls:"..working_dir)
+while true do
+    event, message, sender = coreNetwork.pullEvent()
+    if event == "mouse_scroll" then
+        current_pos = current_pos + message
+        elseif event == "key" then
+        if message == 200 then
+            current_pos = current_pos - 1
+            elseif message == 208 then
+            current_pos = current_pos + 1
+            elseif message == 211 then
+            term.clear()
+            term.setCursorPos(1,1)
+            local file = working_dir..list[current_pos]
+            if isDir(file) then
+                file = string.sub(file,2)
+            end
+            print("Sure you want to delete "..file.."? [y/n]")
+            local choice = read()
+            if choice == "y" or choice == "yes" then
+                coreNetwork.sendMessage(input,"del:"..file)
+                coreNetwork.sendMessage(input,"ls:"..working_dir)
+            end
+            elseif message == 28 then
+            if current_pos == table.getn(list) then break
+            else handle() end
+        end
+        elseif event == "mouse_click" then
+        if current_pos == table.getn(list) then break
+        else handle() end
+        elseif event == "network_message" and sender == input then
+        local dec = coreUtils.Split(message,":")
+        if dec[0] == "ls" then
+            list = textutils.unserialize(dec[1])
+            table.insert(list,1,"..")
+            list[table.getn(list)+1] = "---- Options ----"
+            list[table.getn(list)+1] = "Make a directory"
+            list[table.getn(list)+1] = "Upload a file"
+            list[table.getn(list)+1] = "Quit file browser"
+            elseif dec[0] == "file" then
+            local f = assert(io.open(file_download,"w"))
+            for _,value in pairs(textutils.unserialize(dec[1])) do f:write(value.."\n") end
+            f:close()
+            term.clear()
+            term.setCursorPos(1,1)
+            print("Received file")
+            sleep(1)
+            elseif dec[0] == "get" then
+            term.clear()
+            term.setCursorPos(1,1)
+            print("File doesn't exist")
+            sleep(1)
+            
+        end
+    end
+    current_pos = math.max(1,current_pos)
+    current_pos = math.min(current_pos,table.getn(list))
+    if range_min > current_pos then
+        range_min = range_min - 1 
+        range_max = range_max - 1
+    end
+    if range_max < current_pos then 
+        range_max = range_max + 1 
+        range_min = range_min + 1
+    end
+    draw()
+end 
+coreNetwork.logout()
+term.clear()
+term.setCursorPos(1,1)  

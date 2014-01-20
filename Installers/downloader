@@ -1,0 +1,50 @@
+--Installer made by TheNonstopProgrammer
+function downloadFile(name, url)
+    print("Downloading "..name)
+    local data = http.get(url)
+    local setup = data.readAll()
+    data.close()
+    local f = io.open("disk/"..name,"w")
+    f:write(setup)
+    f:close()
+end
+print("Launching installer version v1.0")
+local dropbox = "https://dl.dropboxusercontent.com/u/19447290/EasyNetworkingLUA/"
+local sides = {"back","bottom","top","left","right"}
+local side = nil
+for _,value in pairs(sides) do
+    if disk.isPresent(value) then
+        side = value
+        break
+    end
+end
+if side ~= nil then    
+    disk.setLabel(side,"Network and Programs")
+    print("Downloading core files...")
+    downloadFile("accesspoint",dropbox.."accesspoint")
+    downloadFile("bridge",dropbox.."bridge")
+    downloadFile("coreNetwork",dropbox.."coreNetwork")
+    downloadFile("coreUtils",dropbox.."coreUtils")
+    downloadFile("dhcpService",dropbox.."dhcpService")
+    downloadFile("install",dropbox.."install")
+    downloadFile("auto_repo",dropbox.."auto_repo")
+    downloadFile("basic_client",dropbox.."basic_client")
+    fs.makeDir("disk/applications")
+    print("Downloading applications...")
+    downloadFile("applications/chatClient",dropbox.."chatClient")
+    downloadFile("applications/chatServer",dropbox.."chatServer")
+    downloadFile("applications/fileBrowser",dropbox.."fileBrowser")
+    downloadFile("applications/fileServer",dropbox.."fileServer")
+    downloadFile("applications/getHosts",dropbox.."getHosts")
+    downloadFile("applications/receiveMessage",dropbox.."receiveMessage")
+    downloadFile("applications/sendMessage",dropbox.."sendMessage")
+    downloadFile("applications/repo",dropbox.."repo")
+    downloadFile("applications/apt-get",dropbox.."apt-get")    
+    print("Done, disk is ready for use")
+    print("Use disk/install to start the program")
+    print("Use disk/basic_client to install the basic client.")
+    print("Use disk/auto_repo to set up a repo server.")
+    else
+    print("No disk was found.")
+end
+fs.delete("installer")

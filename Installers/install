@@ -1,0 +1,314 @@
+term.clear()
+term.setCursorPos(1,1)
+local arg = {...}
+
+function isValidSide(side)
+    if (side == "left") or (side == "right") or (side == "back") or (side == "top") or (side == "bottom") then
+        if peripheral.getType(side) == "modem" then return true end
+    end
+    return false
+end
+
+function detectModem(wired)
+    sides = {"left","right","back","top","bottom"}
+    for key,value in pairs(sides) do
+        if peripheral.getType(value) == "modem" then
+            local modem = peripheral.wrap(value)
+            if modem.isWireless() ~= wired then
+                return value
+            end
+        end
+    end
+end
+
+--install dhcp service
+function installDHCP()
+    os.setComputerLabel("DHCP")
+    print("Creating settings file")
+    local f = assert(io.open("network/settings", "w"))
+    f:write("/side where the modem is attached\n")
+    valid = false
+    side = detectModem(true)
+    while not isValidSide(side) do
+        print("What side is the wired modem attached?")
+        side = read()
+    end
+    f:write("side="..side)
+    f:close()
+    print("Copying files.")
+    if fs.exists("dhcpService") then fs.delete("dhcpService") end
+    if fs.exists("coreUtils") then fs.delete("coreUtils") end
+    fs.copy("disk/dhcpService","dhcpService")
+    fs.copy("disk/coreUtils","coreUtils")
+    print("Run DHCP service on startup?(Default: yes)")
+    answer = nil
+    answer = read()
+    if answer == "" or answer == "y" or answer == "yes" then
+        local f = assert(io.open("startup", "w"))
+        f:write('shell.run("dhcpService")')
+        f:close()
+        print("Restarting computer...")
+        sleep(1)
+        os.reboot()
+    end
+end
+
+--install accesspoint
+function installAP()
+    if os.getComputerLabel() == nil then
+        print("Computer label?")
+        os.setComputerLabel(read())
+    end
+    print("Creating settings file")
+    local f = assert(io.open("network/settings", "w"))
+    f:write("/side where the wired modem is attached\n")
+    valid = false
+    side = detectModem(true)
+    while not isValidSide(side) do
+        print("What side is the wired modem attached?")
+        side = read()
+    end
+    f:write("side_wired="..side.."\n")
+    f:write("/side where the wireless modem is attached\n")
+    valid = false
+    side = detectModem(false)
+    while not isValidSide(side) do
+        print("What side is the wireless modem attached?")
+        side = read()
+    end
+    f:write("side_wireless="..side.."\n")
+    f:write("/Port for com between this device and hdcp\n")
+    print("Wired com port (default: computerID)")
+    comPort = read()
+    if comPort == "" then
+        comPort = os.getComputerID()
+    end
+    f:write("port="..tonumber(comPort).."\n")
+    f:write("/SSID for wireless connection\n")
+    print("Wireless SSID number(default: computerID")
+    comPort = read()
+    if comPort == "" then
+        comPort = os.getComputerID()
+    end
+    f:write("ssid="..tonumber(comPort))
+    f:close()
+    print("Copying files.")
+    if fs.exists("accesspoint") then fs.delete("accesspoint") end
+    if fs.exists("coreUtils") then fs.delete("coreUtils") end
+    fs.copy("disk/accesspoint","accesspoint")
+    fs.copy("disk/coreUtils","coreUtils")
+    print("Run Accesspoint service on startup?(Default: yes)")
+    answer = nil
+    answer = read()
+    if answer == "" or answer == "y" or answer == "yes" then
+        local f = assert(io.open("startup", "w"))
+        f:write('shell.run("accesspoint")')
+        f:close()
+        print("Restarting computer...")
+        sleep(1)
+        os.reboot()
+    end
+end
+
+--install bridge
+function installBridge()
+    if os.getComputerLabel() == nil then
+        print("Computer label?")
+        os.setComputerLabel(read())
+    end
+    print("Creating settings file")
+    local f = assert(io.open("network/settings", "w"))
+    f:write("/side where the wired modem is attached\n")
+    valid = false
+    side = detectModem(true)
+    while not isValidSide(side) do
+        print("What side is the wired modem attached?")
+        side = read()
+    end
+    f:write("side_wired="..side.."\n")
+    f:write("/side where the wireless modem is attached\n")
+    valid = false
+    side = detectModem(false)
+    while not isValidSide(side) do
+        print("What side is the wireless modem attached?")
+        side = read()
+    end
+    f:write("side_wireless="..side.."\n")
+    f:write("/Port for com between this device and hdcp\n")
+    print("Wireless com port (default: computerID)")
+    comPort = read()
+    if comPort == "" then
+        comPort = os.getComputerID()
+    end
+    f:write("port="..tonumber(comPort).."\n")
+    f:write("/SSID for wireless connection\n")
+    print("Wireless SSID number?")
+    comPort = nil
+    if comPort == nil then
+        comPort = tonumber(read())
+    end
+    f:write("ssid="..tonumber(comPort))
+    f:close()
+    print("Copying files.")
+    if fs.exists("bridge") then fs.delete("bridge") end
+    if fs.exists("coreUtils") then fs.delete("coreUtils") end
+    fs.copy("disk/bridge","bridge")
+    fs.copy("disk/coreUtils","coreUtils")
+    print("Run bridge service on startup?(Default: yes)")
+    answer = nil
+    answer = read()
+    if answer == "" or answer == "y" or answer == "yes" then
+        local f = assert(io.open("startup", "w"))
+        f:write('shell.run("bridge")')
+        f:close()
+        print("Restarting computer...")
+        sleep(1)
+        os.reboot()
+    end
+    
+end
+
+--install client
+function installClient()
+    if os.getComputerLabel() == nil then
+        print("Computer label?")
+        os.setComputerLabel(read())
+    end
+    print("Creating settings file")
+    local f = assert(io.open("network/settings", "w"))
+    f:write("/side where the modem is attached\n")
+    valid = false
+    side = detectModem(true)
+    if side ~= nil then
+        f:write("side="..side.."\n")
+        f:write("/SSID for wireless connection\n")
+        f:write("ssid=\n")
+        else
+        side = detectModem(false)
+        if side ~= nil then
+            f:write("side="..side.."\n")
+            print("Wireless ssid number?")
+            input = nil
+            while input == nil do
+                input = read()
+            end
+            f:write("/SSID for wireless connection\n")
+            f:write("ssid="..tonumber(input).."\n")
+            else
+            side = nil
+            while not isValidSide(side) do
+                print("What side is the modem attached?")
+                side = read()
+            end
+            f:write("side="..side.."\n")
+            print("Wireless ssid number?")
+            input = nil
+            while input == nil do
+                input = read()
+            end
+            f:write("/SSID for wireless connection\n")
+            f:write("ssid="..tonumber(input))
+        end
+    end
+    f:write("/Port for com between this device and hdcp\n")
+    print("Com port (default: computerID)")
+    comPort = read()
+    if comPort == "" then
+        comPort = os.getComputerID()
+    end
+    f:write("port="..tonumber(comPort).."\n")
+    f:close()
+    print("Copying files.")
+    if fs.exists("coreNetwork") then fs.delete("coreNetwork") end
+    if fs.exists("coreUtils") then fs.delete("coreUtils") end
+    fs.copy("disk/coreNetwork","coreNetwork")
+    fs.copy("disk/coreUtils","coreUtils")
+end
+
+--install applications
+function installApp()
+    local apps = fs.list("disk/applications")
+    apps[table.getn(apps)+1]= "Install selected applications."
+    local state = {}
+    local choice = nil
+    local current_pos = 1
+    local x,y = term.getSize()
+    range_min = 1
+    range_max = y-1
+    while true do
+        term.clear()
+        term.setCursorPos(1,1)
+        print("Loading applications installer.")
+        for i=range_min,math.min(range_max,table.getn(apps)) do 
+            if state[i] == nil then
+                if i ~= math.min(range_max,table.getn(apps)) then 
+                    state[i] = false 
+                    else state[i] = "" 
+                end
+            end
+            if i == current_pos then print(">"..apps[i].." "..tostring(state[i])) else print(apps[i].." "..tostring(state[i])) end        
+        end
+        local event, message = os.pullEvent()
+        if event == "mouse_scroll" then
+            current_pos = current_pos + message
+            elseif event == "key" then
+            if message == 200 then
+                current_pos = current_pos - 1
+                elseif message == 208 then
+                current_pos = current_pos + 1            
+                elseif message == 28 then
+                if current_pos == table.getn(apps) then break
+                else state[current_pos] = not state[current_pos] end
+            end
+            elseif event == "mouse_click" then
+            if current_pos == table.getn(apps) then break
+            else state[current_pos] = not state[current_pos] end        
+        end    
+        current_pos = math.max(1,current_pos)
+        current_pos = math.min(current_pos,table.getn(apps))
+        if range_min > current_pos then
+            range_min = range_min - 1 
+            range_max = range_max - 1
+            end
+            if range_max < current_pos then 
+                range_max = range_max + 1 
+                range_min = range_min + 1
+            end
+    end
+    for i=1,table.getn(apps)-1 do
+        if state[i] then
+            if (fs.exists(apps[i]) and not fs.isDir(apps[i])) or not fs.exists(apps[i]) then
+                print("Installing "..apps[i]) 
+                fs.delete(apps[i])
+                fs.copy("disk/applications/"..apps[i],apps[i])
+                else
+                print("Can't install "..apps[i])
+            end
+        end
+    end
+end
+
+--Installer
+if arg[1] == "dhcp" or arg[1] == "client" or arg[1] == "accesspoint" or arg[1] == "bridge" or arg[1] == "applications" or arg[1] == "app" then
+    print("Installing "..arg[1]..".")
+    print("Making network folder.")
+    fs.makeDir("network")
+    if arg[1] == "dhcp" then
+        installDHCP()
+    end
+    if arg[1] == "accesspoint" then
+        installAP()
+    end
+    if arg[1] == "bridge" then
+        installBridge()
+    end
+    if arg[1] == "client" then
+    installClient()
+end
+if arg[1] == "app" or arg[1] == "applications" then
+    installApp()
+end
+else
+print("Not a valid install option.")
+print("Use dhcp, client, accesspoint, bridge, applications or app.")
+end
