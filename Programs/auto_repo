@@ -1,3 +1,7 @@
+--[[
+Made by: TheNonStopProgrammer
+Explanation: Script that makes a computer the default repo.
+]]
 print("Setting up repo..")
 print("The easiest way is to set the name of the main repo server to 'repo'")
 print("Other names  have to be added to the apt/sources file")

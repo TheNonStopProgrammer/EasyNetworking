@@ -1,3 +1,7 @@
+--[[
+Made by: TheNonStopProgrammer
+Explanation: Simple script that shows the hosts that are online, more of a demo than a real program.
+]]
 os.loadAPI("coreNetwork")
 coreNetwork.login()
 hosts = coreNetwork.getHosts()

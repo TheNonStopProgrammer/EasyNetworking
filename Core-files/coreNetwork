@@ -1,3 +1,14 @@
+--[[
+Made by: TheNonStopProgrammer
+Explanation: coreNetwork is a API that allows for sending and handling messages.
+First a program has to login with coreNetwork.login()
+this logs the computer in with its label.
+after that you can use coreNetwork.sendMessage to send a message and
+you MUST USE corenetwork.pullEvent()
+this handles all internal messages.
+and raises a event network_message with message, sender and target as arguments.
+]]
+
 --loading core utils
 os.loadAPI("coreUtils")
 

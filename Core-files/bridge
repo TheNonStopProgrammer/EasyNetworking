@@ -1,3 +1,9 @@
+--[[
+Made by: TheNonStopProgrammer
+Explanation: bridge connects a wireless network to a wired network.
+The bridge it self doesnt have a hostname, but every login that is made through the
+wired part is send to the accesspoint.
+]]
 os.loadAPI("coreUtils")
 
 settings = {}

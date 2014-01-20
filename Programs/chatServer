@@ -1,3 +1,7 @@
+--[[
+Made by: TheNonStopProgrammer
+Explanation: Host program for a chat server
+]]
 os.loadAPI("coreNetwork")
 coreNetwork.login()
 term.clear()

@@ -1,3 +1,10 @@
+--[[
+Made by: TheNonStopProgrammer
+Explanation: This is the big guy, the worker, the message handler, the work horse.
+This program sorts out all the messages. Routes them to the right destination.
+Only one dhcpService is allowed on a network.
+just run this program not more to it.
+]]
 --loading core utils
 os.loadAPI("coreUtils")
 

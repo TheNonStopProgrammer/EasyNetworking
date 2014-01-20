@@ -1,3 +1,9 @@
+--[[
+Made by: TheNonStopProgrammer
+Explanation: Install script. This will make the config files, and copies the right files.
+Usage: disk/install [dhcp, accesspoint, bridge, client or app]
+]]
+
 term.clear()
 term.setCursorPos(1,1)
 local arg = {...}

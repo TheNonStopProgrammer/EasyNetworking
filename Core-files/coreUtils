@@ -1,3 +1,7 @@
+--[[
+Made by: TheNonStopProgrammer
+Explanation: Just a basic API that handles config files and string manipulation.
+]]
 function Split(str, delim)
     local result = {}
     local pos = string.find(str, delim)

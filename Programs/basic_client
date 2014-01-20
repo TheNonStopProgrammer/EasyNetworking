@@ -1,3 +1,7 @@
+--[[
+Made by: TheNonStopProgrammer
+Explanation: Script that install the most used programs.
+]]
 print("Setting up basic client..")
 shell.run("disk/install","client")
 fs.delete("apt-get")

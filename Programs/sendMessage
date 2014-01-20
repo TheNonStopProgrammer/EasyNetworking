@@ -1,3 +1,7 @@
+--[[
+Made by: TheNonStopProgrammer
+Explanation: Sends a network message to a hostname, network demo and testing program.
+]]
 --os.setComputerLabel("comp1")
 os.loadAPI("coreNetwork")
 term.clear()

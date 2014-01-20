@@ -1,3 +1,9 @@
+--[[
+Made by: TheNonStopProgrammer
+Explanation: accesspoint connects a wired network to a wireless network.
+The accesspoint it self doesnt have a hostname, but every login that is made through the
+wireless part is send to the router or bridge
+]]
 os.loadAPI("coreUtils")
 
 settings = {}
