@@ -5,12 +5,10 @@
     wireless part is send to the router or bridge
 ]]
 os.loadAPI("coreUtils")
-
-settings = {}
-settings = coreUtils.loadConfig("network/settings", true)
+local settings = coreUtils.loadConfig("network/settings", true)
 if settings["port"] == "" then settings["port"] = os.getComputerID() end
 if settings["ssid"] == "" then settings["ssid"] = os.getComputerID() end
-hosts = {}
+local hosts = {}
 
 --Accespoint wireless spoofs a hdcp server
 --Accespoint wired is a network device using multiple host names
@@ -66,8 +64,6 @@ function handleWireless(freq, repfreq, message)
             if data["data"] == "login" then
                 modem_wired.transmit(1, settings["port"], message)
                 newHost(data["sender"],repfreq)
-                elseif data["data"] == "logout" then
-                removeHost(data["sender"])
             end
             else
             if table.contains(hosts,data["target"]) then
