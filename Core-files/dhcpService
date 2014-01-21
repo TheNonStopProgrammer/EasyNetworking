@@ -27,7 +27,7 @@ function newHost(hostname, port)
         print("New host: "..hostname)
         return true
     end
-    return false
+    return hosts[hostname] == port
 end
 
 function removeHost(hostname)
