@@ -1,38 +1,38 @@
 --[[
-Made by: TheNonStopProgrammer
-Explanation: Just a basic API that handles config files, string manipulation and table.contains.
+    Made by: TheNonStopProgrammer
+    Explanation: Just a basic API that handles config files, string manipulation and table.contains.
 ]]
 function Split(str, delim)
     local result = {}
     local pos = string.find(str, delim)
     if pos ~= nil then
-    result["succes"] = true
-    result[0] = string.sub(str,0,pos-1)
-    result[1] = string.sub(str,pos+1)
-    else
-    result["succes"] = false
+        result["succes"] = true
+        result[0] = string.sub(str,0,pos-1)
+        result[1] = string.sub(str,pos+1)
+        else
+        result["succes"] = false
     end 
     return result
 end
 
 function loadConfig(filename, debugout)
-local f = assert(io.open(filename, "r"))
-local settings = {}
- for line in f:lines() do
- if string.sub(line,0,1) ~= "/" then
- decoded = Split(line,'=')
-if decoded["succes"] then
- settings[decoded[0]] = decoded[1]
- if debugout then 
- print("Loaded config: "..decoded[0].." Value: "..decoded[1])
- end
- else
- if debugout then 
- print("Error in line: "..line)
- end
- end
- end
- end
+    local f = assert(io.open(filename, "r"))
+    local settings = {}
+    for line in f:lines() do
+        if string.sub(line,0,1) ~= "/" then
+            decoded = Split(line,'=')
+            if decoded["succes"] then
+                settings[decoded[0]] = decoded[1]
+                if debugout then 
+                    print("Loaded config: "..decoded[0].." Value: "..decoded[1])
+                end
+                else
+                if debugout then 
+                    print("Error in line: "..line)
+                end
+            end
+        end
+    end
     f:close()
     return settings
 end
@@ -46,7 +46,7 @@ function deepcopy(orig)
             copy[deepcopy(orig_key)] = deepcopy(orig_value)
         end
         setmetatable(copy, deepcopy(getmetatable(orig)))
-    else -- number, string, boolean, etc
+        else -- number, string, boolean, etc
         copy = orig
     end
     return copy
@@ -57,10 +57,20 @@ function getFile(path)
 end
 
 function table.contains(table, element)
-  for _, value in pairs(table) do
-    if value == element then
-      return true
+    for _, value in pairs(table) do
+        if value == element then
+            return true
+        end
     end
-  end
-  return false
+    return false
+end
+
+
+function packetBuilder(identifier, target, sender, data)
+    local packet = {}
+    packet["identifier"] = identifier
+    packet["target"] = target
+    packet["sender"] = sender
+    packet["data"] = data
+    return textutils.serialize(packet)   
 end

@@ -48,19 +48,10 @@ function isValidIdentifier(identifier)
     return identifier == "string" or identifier == "table" or identifier == "log" or identifier == "command" or identifier == "network"
 end
 
-local function packetBuilder(identifier, target, sender, data)
-    local packet = {}
-    packet["identifier"] = identifier
-    packet["target"] = target
-    packet["sender"] = sender
-    packet["data"] = data
-    return textutils.serialize(packet)   
-end
-
 function login()    
     if settings["hostname"] ~= nil then
         timerID = os.startTimer(2)
-        modem.transmit(dhcpPort,settings["port"],packetBuilder("network","dhcp",settings["hostname"],"login"))
+        modem.transmit(dhcpPort,settings["port"],coreUtils.packetBuilder("network","DHCP",settings["hostname"],"login"))
         else
         print("Error: No hostname.")
         return false
@@ -70,7 +61,7 @@ end
 function logout()
     if loggedIN then
         timerID = os.startTimer(2)
-        modem.transmit(dhcpPort,settings["port"],packetBuilder("network","dhcp",settings["hostname"],"logout")) 
+        modem.transmit(dhcpPort,settings["port"],coreUtils.packetBuilder("network","DHCP",settings["hostname"],"logout")) 
         else
         print("Error: Not logged in")
         return false
@@ -80,7 +71,7 @@ end
 function getHosts()   
     if loggedID then
         timerID = os.startTimer(2)
-        modem.transmit(dhcpPort,settings["port"],packetBuilder("network","dhcp",settings["hostname"],"hosts")) 
+        modem.transmit(dhcpPort,settings["port"],coreUtils.packetBuilder("network","DHCP",settings["hostname"],"hosts")) 
         return result()
         else
         print("Error: Not logged in.")
@@ -91,7 +82,7 @@ end
 function sendMessage(target, identifier, payload)
     if loggedIN and isValidIdentifier(identifier) then
         timerID = os.startTimer(2)
-        modem.transmit(dhcpPort,settings["port"],packetBuilder(identifier,target,settings["hostname"],payload))
+        modem.transmit(dhcpPort,settings["port"],coreUtils.packetBuilder(identifier,target,settings["hostname"],payload))
         else
         print("Error: Not logged in or not a valid identifier.")
     end
@@ -110,7 +101,7 @@ function sendFile(target, file)
             f.close()
             local folder, name = getFile(file)
             payload["name"] = name
-            modem.transmit(dhcpPort,settings["port"],packetBuilder("file",target,settings["hostname"],payload))
+            modem.transmit(dhcpPort,settings["port"],coreUtils.packetBuilder("file",target,settings["hostname"],payload))
             else
             print("Error: File not found.")
         end
