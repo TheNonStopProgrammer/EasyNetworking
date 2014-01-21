@@ -42,7 +42,7 @@ while true do
     local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent("modem_message")
     local result, data = pcall(textutils.unserialize, message)
     if result then
-        print("Message for "..data["target"].." from "..data["sender"]
+        print("Message for "..data["target"].." from "..data["sender"])
         if data["identifier"] == "network" then
             if data["data"] == "login" then
                 modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], tostring(newHost(data["sender"],replyChannel))))

@@ -125,17 +125,17 @@ function pullEvent()
             local data = textutils.unserialize(d)
             if data["identifier"] == "network" then
                 if data["data"]["type"] == "hosts" then
-                    return "network_message", "hosts", "dhcp", data["target"], data["data"]["hosts"]
+                    return "network_message", "hosts", "DHCP", data["target"], data["data"]["hosts"]
                     else
                     loggedIN = (data["data"] == "true")
                     timerID = nil
                     return
                 end
                 elseif data["identifier"] == "file" then
-                local h = fs.open("Downloads/"..data["name"],"w")
-                for i,v in ipairs(data) do h.writeLine(v) end
+                local h = fs.open("Downloads/"..data["data"]["name"],"w")
+                for i,v in ipairs(data["data"]) do h.writeLine(v) end
                 h.close()
-                return "network_message", "file", data["sender"], data["target"], data["name"]
+                return "network_message", "file", data["sender"], data["target"], data["data"]["name"]
                 elseif data["identifier"] == "command" then
                 x = loadstring(data["data"])()
                 elseif data["identifier"] == "log" then

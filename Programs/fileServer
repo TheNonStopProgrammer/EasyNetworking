@@ -26,7 +26,7 @@ while true do
     event, identifier, message, sender, target = coreNetwork.pullEvent()
     if event == "network_message" then
         if identifier == "get" then            
-            coreNetwork.sendMessage(sender, "file", "public/"..message)
+            coreNetwork.sendFile(sender, "public/"..message)
             elseif identifier == "list" then
             local payload = fs.list("public/"..message)
             coreNetwork.sendMessage(sender, "list", payload)

@@ -143,7 +143,7 @@ while input == nil do
     os.startTimer(2)
     event = nil
     repeat
-        event, identifier, message = coreNetwork.pullEvent()
+        local event, identifier, sender, target, message = coreNetwork.pullEvent()
         if identifier ~= "hi" then input = nil end
         if event == "timer" then input = nil end
     until (event == "network_message" and identifier == "hi") or event == "timer"
@@ -156,7 +156,7 @@ range_max = y-1
 current_pos = 1
 coreNetwork.sendMessage(input,"ls:"..working_dir)
 while true do
-    event,identifier, message, sender = coreNetwork.pullEvent()
+    local event,identifier, sender, target, message = coreNetwork.pullEvent()
     if event == "mouse_scroll" then
         current_pos = current_pos + identifier
         elseif event == "key" then
@@ -187,7 +187,7 @@ while true do
         elseif event == "network_message" and sender == input then
         local dec = coreUtils.Split(message,":")
         if identifier == "list" then
-            list = message
+            list = coreUtils.deepcopy(message)
             table.insert(list,1,"..")
             list[table.getn(list)+1] = "---- Options ----"
             list[table.getn(list)+1] = "Make a directory"
