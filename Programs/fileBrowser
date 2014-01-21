@@ -154,7 +154,9 @@ local x,y = term.getSize()
 range_min = 1
 range_max = y-1
 current_pos = 1
-coreNetwork.sendMessage(input,"ls:"..working_dir)
+coreNetwork.sendMessage(input,"list"..working_dir)
+local list = {}
+
 while true do
     local event, identifier, sender, target, message = coreNetwork.pullEvent()
     if event == "mouse_scroll" then
