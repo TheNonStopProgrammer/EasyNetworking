@@ -32,7 +32,7 @@ function handle()
             else
             working_dir = ""
         end
-        coreNetwork.sendMessage(input,"ls:"..working_dir)
+        coreNetwork.sendMessage(input,"list",working_dir)
         elseif current_pos == table.getn(list)-3 then
         elseif current_pos == table.getn(list)-2 then
         term.clear()
@@ -43,8 +43,8 @@ function handle()
         if isDir(folder) then
             folder = string.sub(folder,2)
         end
-        coreNetwork.sendMessage(input,"mkdir:"..folder)
-        coreNetwork.sendMessage(input,"ls:"..working_dir)
+        coreNetwork.sendMessage(input,"makedir",folder)
+        coreNetwork.sendMessage(input,"list",working_dir)
         elseif current_pos == table.getn(list)-1 then
         term.clear()
         term.setCursorPos(1,1)
@@ -87,16 +87,16 @@ function handle()
             local packet = {}
             packet["name"] = file_upload
             packet["data"] = textutils.serialize(data)
-            coreNetwork.sendMessage(input, "post:"..textutils.serialize(packet))
+            coreNetwork.sendMessage(input, "post",textutils.serialize(packet))
             sleep(1)
-            coreNetwork.sendMessage(input,"ls:"..working_dir)
+            coreNetwork.sendMessage(input,"list",working_dir)
         end
         elseif isDir(list[current_pos]) then
         working_dir = working_dir..list[current_pos]
         if isDir(working_dir) then
             working_dir = string.sub(working_dir,2)
         end
-        coreNetwork.sendMessage(input,"ls:"..working_dir)
+        coreNetwork.sendMessage(input,"list",working_dir)
         else
         local file = working_dir..list[current_pos]
         if isDir(file) then
@@ -125,7 +125,7 @@ function handle()
         print("Getting: "..file)
         print("Saving to: "..file_download)
         sleep(1)
-        coreNetwork.sendMessage(input,"get:"..file)
+        coreNetwork.sendMessage(input,"get",file)
     end
 end
 
@@ -139,12 +139,12 @@ input = nil
 
 while input == nil do
     input = read()
-    coreNetwork.sendMessage(input,"hello:")
+    coreNetwork.sendMessage(input,"hello","hello")
     os.startTimer(2)
     event = nil
     repeat
-        event, message = coreNetwork.pullEvent()
-        if message ~= "hi" then input = nil end
+        event, identifier, message = coreNetwork.pullEvent()
+        if identifier ~= "hi" then input = nil end
         if event == "timer" then input = nil end
     until event == "network_message" or event == "timer"
 end

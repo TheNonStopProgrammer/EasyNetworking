@@ -26,13 +26,15 @@ while true do
     event, identifier, message, sender, target = coreNetwork.pullEvent()
     if event == "network_message" then
         if identifier == "get" then            
-            coreNetwork.send(sender, "file", "public/"..message)
+            coreNetwork.sendMessage(sender, "file", "public/"..message)
         elseif identifier == "list" then
             local payload = fs.list("public/"..message)
-            coreNetwork.send(sender, "list", payload)
+            coreNetwork.sendMessage(sender, "list", payload)
             elseif identifier == "makedir" then
             fs.makeDir("public/"..message)
             end
+        elseif identifier == "list" then
+            coreNetwork.sendMessage(sender, "hi", "hi")
     end
 end
 
