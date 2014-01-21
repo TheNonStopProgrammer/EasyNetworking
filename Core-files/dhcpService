@@ -24,6 +24,7 @@ modem.open(1)
 function newHost(hostname, port)
     if hosts[hostname] == nil then
         hosts[hostname] = port
+        print("New host: "..hostname)
         return true
     end
     return false
@@ -32,6 +33,7 @@ end
 function removeHost(hostname)
     if hosts[hostname] ~= nil then
         hosts[hostname] = nil
+        print("Removed host: "..hostname)
         return true
     end
     return false
@@ -43,9 +45,9 @@ while true do
     if result then
         if data["identifier"] == "network" then
             if data["data"] == "login" then
-                modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], newHost(data["sender"])))
+                modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], tostring(newHost(data["sender"]))))
                 elseif data["data"] == "logout" then
-                modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], removeHost(data["sender"])))
+                modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], tostring(removeHost(data["sender"]))))
                 elseif data["data"] == "hosts" then
                 local payload = {}
                 payload["type"] = "hosts"

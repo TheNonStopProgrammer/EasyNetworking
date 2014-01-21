@@ -120,7 +120,7 @@ function pullEvent()
                 if data["data"]["type"] == "hosts" then
                     return "network_message", "hosts", "dhcp", data["target"], data["data"]["hosts"]
                     else
-                    loggedIN = data["data"]
+                    loggedIN = (data["data"] == "true")
                     timerID = nil
                 end
                 elseif data["identifier"] == "file" then
