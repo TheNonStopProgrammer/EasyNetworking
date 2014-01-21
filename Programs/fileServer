@@ -23,7 +23,7 @@ if not fs.exists("public") then fs.makeDir("public") end
 print("File server running. Name: "..os.getComputerLabel())
 
 while true do
-    event, identifier, message, sender, target = coreNetwork.pullEvent()
+    event, identifier, sender, target, message = coreNetwork.pullEvent()
     if event == "network_message" then
         if identifier == "get" then            
             coreNetwork.sendFile(sender, "public/"..message)

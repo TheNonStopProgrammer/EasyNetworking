@@ -156,7 +156,7 @@ range_max = y-1
 current_pos = 1
 coreNetwork.sendMessage(input,"ls:"..working_dir)
 while true do
-    local event,identifier, sender, target, message = coreNetwork.pullEvent()
+    local event, identifier, sender, target, message = coreNetwork.pullEvent()
     if event == "mouse_scroll" then
         current_pos = current_pos + identifier
         elseif event == "key" then
