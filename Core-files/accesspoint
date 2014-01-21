@@ -64,7 +64,10 @@ function handleWireless(freq, repfreq, message)
     if result then
         if data["identifier"] == "network" then
             if data["data"] == "login" then
-                modem_wired.transmit(1, settings["port"], message)               
+                modem_wired.transmit(1, settings["port"], message)
+                newHost(data["sender"],repfreq)
+                elseif data["data"] == "logout" then
+                removeHost(data["sender"])
             end
             else
             if table.contains(hosts,data["target"]) then
