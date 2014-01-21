@@ -32,7 +32,7 @@ while true do
             coreNetwork.sendMessage(sender, "list", payload)
             elseif identifier == "makedir" then
             fs.makeDir("public/"..message)
-            elseif identifier == "list" then
+            elseif identifier == "hello" then
             coreNetwork.sendMessage(sender, "hi", "hi")
         end        
     end

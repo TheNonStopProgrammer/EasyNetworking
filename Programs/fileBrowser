@@ -130,7 +130,7 @@ function handle()
 end
 
 os.loadAPI("coreNetwork")
-coreNetwork.login()Fil
+coreNetwork.login()
 term.clear()
 term.setCursorPos(1,1)
 file_download = nil
