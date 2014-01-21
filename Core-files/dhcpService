@@ -23,7 +23,7 @@ modem.open(1)
 
 function newHost(hostname, port)
     if hosts[hostname] == nil then
-        hosts[hostname] = port
+        hosts[hostname] = tonumber(port)
         print("New host: "..hostname)
         return true
     end
@@ -45,9 +45,9 @@ while true do
     if result then
         if data["identifier"] == "network" then
             if data["data"] == "login" then
-                modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], tostring(newHost(data["sender"]))))
+                modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], tostring(newHost(data["sender"],replyChannel))))
                 elseif data["data"] == "logout" then
-                modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], tostring(removeHost(data["sender"]))))
+                modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], tostring(removeHost(data["sender"],replyChannel))))
                 elseif data["data"] == "hosts" then
                 local payload = {}
                 payload["type"] = "hosts"

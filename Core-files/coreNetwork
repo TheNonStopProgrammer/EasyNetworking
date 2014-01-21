@@ -52,8 +52,8 @@ function login()
     if settings["hostname"] ~= nil then
         timerID = os.startTimer(2)
         modem.transmit(dhcpPort,settings["port"],coreUtils.packetBuilder("network","DHCP",settings["hostname"],"login"))
-                repeat
-                    pullEvent()
+        repeat
+            pullEvent()
         until timerID == nil
         else
         print("Error: No hostname.")
@@ -78,7 +78,7 @@ function getHosts()
     if loggedID then
         timerID = os.startTimer(2)
         modem.transmit(dhcpPort,settings["port"],coreUtils.packetBuilder("network","DHCP",settings["hostname"],"hosts")) 
-                repeat
+        repeat
             pullEvent()
         until timerID == nil
         else
@@ -91,8 +91,8 @@ function sendMessage(target, identifier, payload)
     if loggedIN and isValidIdentifier(identifier) then
         timerID = os.startTimer(2)
         modem.transmit(dhcpPort,settings["port"],coreUtils.packetBuilder(identifier,target,settings["hostname"],payload))
-                repeat
-                    pullEvent()
+        repeat
+            pullEvent()
         until timerID == nil
         else
         print("Error: Not logged in or not a valid identifier.")
@@ -152,8 +152,8 @@ function pullEvent()
             print("No response. Is DHCP offline?")
             timerID = nil
             return "failed_message"
-        else
-        return event, a, b, c, d, e
+            else
+            return event, a, b, c, d, e
+        end
     end
-end
 end
