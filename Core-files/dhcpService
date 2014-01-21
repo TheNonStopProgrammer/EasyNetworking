@@ -39,7 +39,7 @@ end
 
 while true do
     local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent("modem_message")
-    local result, data = pcall(textutils.unserialize(message))
+    local result, data = pcall(textutils.unserialize, message)
     if result then
         if data["identifier"] == "network" then
             if data["data"] == "login" then
