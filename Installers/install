@@ -223,6 +223,13 @@ function installClient()
         comPort = os.getComputerID()
     end
     f:write("port="..tonumber(comPort).."\n")
+    f:write("/Hostname for this computer\n")
+    print("Hostname?")
+    comPort = read()
+    if comPort == "" then
+        comPort = os.getComputerLabel()
+    end
+    f:write("hostname="..comPort.."\n")
     f:close()
     print("Copying files.")
     if fs.exists("coreNetwork") then fs.delete("coreNetwork") end
