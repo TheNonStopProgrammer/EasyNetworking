@@ -75,7 +75,7 @@ function handleWireless(freq, repfreq, message)
             else
             modem_wired.transmit(1,settings["port"],message)
             end
-            modem_wireless.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], "true"))
+            modem_wireless.transmit(repfreq, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], "true"))
         end
         else
         print("ERROR: "..message)
