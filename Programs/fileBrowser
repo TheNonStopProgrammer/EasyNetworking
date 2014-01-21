@@ -1,6 +1,6 @@
 --[[
-Made by: TheNonStopProgrammer
-Explanation: Used for browsing on a fileServer
+    Made by: TheNonStopProgrammer
+    Explanation: Used for browsing on a fileServer
 ]]
 function draw()
     term.clear()
@@ -154,7 +154,7 @@ local x,y = term.getSize()
 range_min = 1
 range_max = y-1
 current_pos = 1
-coreNetwork.sendMessage(input,"list"..working_dir)
+coreNetwork.sendMessage(input,"list",working_dir)
 local list = {}
 
 while true do
@@ -176,8 +176,8 @@ while true do
             print("Sure you want to delete "..file.."? [y/n]")
             local choice = read()
             if choice == "y" or choice == "yes" then
-                coreNetwork.sendMessage(input,"del:"..file)
-                coreNetwork.sendMessage(input,"ls:"..working_dir)
+                coreNetwork.sendMessage(input,"del",file)
+                coreNetwork.sendMessage(input,"list",working_dir)
             end
             elseif identifier == 28 then
             if current_pos == table.getn(list) then break
@@ -187,7 +187,6 @@ while true do
         if current_pos == table.getn(list) then break
         else handle() end
         elseif event == "network_message" and sender == input then
-        local dec = coreUtils.Split(message,":")
         if identifier == "list" then
             list = coreUtils.deepcopy(message)
             table.insert(list,1,"..")
