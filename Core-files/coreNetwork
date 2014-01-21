@@ -124,14 +124,14 @@ function pullEvent()
                     timerID = nil
                 end
                 elseif data["identifier"] == "file" then
-                    local h = fs.open("Downloads/"..data["name"],"w")
-                    for i,v in ipairs(data) do h.writeLine(v) end
-                    h.close()
-                    return "network_message", "file", data["sender"], data["target"], data["name"]
+                local h = fs.open("Downloads/"..data["name"],"w")
+                for i,v in ipairs(data) do h.writeLine(v) end
+                h.close()
+                return "network_message", "file", data["sender"], data["target"], data["name"]
                 elseif data["identifier"] == "command" then
-                    data["data"]()
+                data["data"]()
                 elseif data["identifier"] == "log" then
-                    print(data["data"])
+                print(data["data"])
                 else
                 return "network_message", data["identifier"], data["sender"], data["target"], data["data"]
             end
@@ -140,7 +140,6 @@ function pullEvent()
             elseif event == "timer" and a == timerID then
             print("No response. Is DHCP offline?")
             return "failed_message"
-        end
         else
         return event, a, b, c, d, e
     end
