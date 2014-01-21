@@ -140,7 +140,7 @@ function pullEvent()
                 h.close()
                 return "network_message", "file", data["sender"], data["target"], data["name"]
                 elseif data["identifier"] == "command" then
-                _G[data["data"]]()
+                x = loadstring(data["data"])()
                 elseif data["identifier"] == "log" then
                 print(data["data"])
                 else
