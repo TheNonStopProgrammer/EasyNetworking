@@ -91,7 +91,7 @@ function sendMessage(target, identifier, payload)
             pullEvent()
         until timerID == nil
         else
-        print("Error: Not logged in or not a valid identifier.")
+        print("Error: Not logged in.")
     end
 end
 
