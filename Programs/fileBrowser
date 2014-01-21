@@ -146,7 +146,7 @@ while input == nil do
         event, identifier, message = coreNetwork.pullEvent()
         if identifier ~= "hi" then input = nil end
         if event == "timer" then input = nil end
-    until event == "network_message" or event == "timer"
+    until (event == "network_message" and identifier == "hi") or event == "timer"
 end
 
 working_dir = ""
