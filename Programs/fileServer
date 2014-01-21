@@ -1,6 +1,6 @@
 --[[
-Made by: TheNonStopProgrammer
-Explanation: Program that turns a computer into a file server.
+    Made by: TheNonStopProgrammer
+    Explanation: Program that turns a computer into a file server.
 ]]
 function file_exists(name)
     local f = io.open(name,"r")
@@ -27,14 +27,14 @@ while true do
     if event == "network_message" then
         if identifier == "get" then            
             coreNetwork.sendMessage(sender, "file", "public/"..message)
-        elseif identifier == "list" then
+            elseif identifier == "list" then
             local payload = fs.list("public/"..message)
             coreNetwork.sendMessage(sender, "list", payload)
             elseif identifier == "makedir" then
             fs.makeDir("public/"..message)
-            end
-        elseif identifier == "list" then
+            elseif identifier == "list" then
             coreNetwork.sendMessage(sender, "hi", "hi")
+        end        
     end
 end
 
