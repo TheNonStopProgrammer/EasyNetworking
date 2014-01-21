@@ -189,13 +189,13 @@ while true do
         elseif event == "network_message" and sender == input then
         if identifier == "list" then
             list = coreUtils.deepcopy(message)
-            table.insert(list,1,"..")
-            list[table.getn(list)+1] = "---- Options ----"
-            list[table.getn(list)+1] = "Make a directory"
-            list[table.getn(list)+1] = "Upload a file"
-            list[table.getn(list)+1] = "Quit file browser"    
         end
     end
+    table.insert(list,1,"..")
+    list[table.getn(list)+1] = "---- Options ----"
+    list[table.getn(list)+1] = "Make a directory"
+    list[table.getn(list)+1] = "Upload a file"
+    list[table.getn(list)+1] = "Quit file browser"    
     current_pos = math.max(1,current_pos)
     current_pos = math.min(current_pos,table.getn(list))
     if range_min > current_pos then
