@@ -1,8 +1,8 @@
 --[[
-Made by: TheNonStopProgrammer
-Explanation: accesspoint connects a wired network to a wireless network.
-The accesspoint it self doesnt have a hostname, but every login that is made through the
-wireless part is send to the router or bridge
+    Made by: TheNonStopProgrammer
+    Explanation: accesspoint connects a wired network to a wireless network.
+    The accesspoint it self doesnt have a hostname, but every login that is made through the
+    wireless part is send to the router or bridge
 ]]
 os.loadAPI("coreUtils")
 
@@ -12,7 +12,7 @@ if settings["port"] == "" then settings["port"] = os.getComputerID() end
 if settings["ssid"] == "" then settings["ssid"] = os.getComputerID() end
 hosts = {}
 
---Accespoint wireless spoofs the a hdcp server
+--Accespoint wireless spoofs a hdcp server
 --Accespoint wired is a network device using multiple host names
 
 --starting accesspoint
@@ -24,169 +24,64 @@ modem_wired.open(settings["port"])
 modem_wireless.open(settings["ssid"])
 print("Wireless accespoint ssid: "..settings["ssid"])
 
---Pull event
-function pullEvent()
-while true do
-event, a, b, c, d, e = os.pullEvent()
-if event == "modem_message" then
-    if c == 1 then
-        local dec_message = {}
-        dec_message = coreUtils.Split(d,':')
-    if dec_message["succes"] then
-        if dec_message[0] == "handshake" then
-            waiting = false
-            return (dec_message[1] == "true")           
-        end
-        if dec_message[0] == "hosts" then
-            waiting = false
-            return "hosts",dec_message[1]
-        end
-        if dec_message[0] == "received" then
-            waiting = false
-            return (dec_message[1] == "true")
-        end
-    else
-        print("Unexpected message: "..d)
-    end
-    end
-elseif event == "timer" and a == timerID then
-    if waiting then
-        print("No response. Is DHCP offline?")
-        waiting = false
-        return false
-    end
-end
-end
-end
-
 --Add host to the table
-function newHost(data)
-if hosts[data["name"]] == nil then
-hosts[data["name"]] = {}
-hosts[data["name"]] = data
-return true
-end
-return false
-end
-
---Remove host from table
-function removeHost(data)
-if hosts[data["name"]] ~= nil then
-hosts[data["name"]] = nil
-return true
-end
-return false
+function newHost(hostname, port)
+    if hosts[hostname] == nil then
+        hosts[hostname] = tonumber(port)
+        print("New host: "..hostname)
+        return true
+    end
+    return hosts[hostname] == port
 end
 
---Creating the login packet
-function login(modem, host_name)
- local host_data = {}
- local succes = false
- if host_name ~= "" then
-    host_data["name"] = host_name
-    host_data["port"] = settings["port"]
-    timerID = os.startTimer(2)
-    waiting = true
-    NextLoggedIn = true
-    modem.transmit(1, settings["port"], "login:"..textutils.serialize(host_data))
-    while waiting do succes = pullEvent() end    
-    return succes  
-end
- return false
-end
-
---Creating the logout packet
-function logout(modem, host_name)
-local host_data = {}
- if host_name ~= "" then
- host_data["name"] = host_name
- host_data["port"] = settings["port"]
- timerID = os.startTimer(2)
- waiting = true
- modem.transmit(1,settings["port"],"logout:"..textutils.serialize(host_data))
- while waiting do succes = pullEvent() end
-  return succes 
-end
- return false
+function removeHost(hostname)
+    if hosts[hostname] ~= nil then
+        hosts[hostname] = nil
+        print("Removed host: "..hostname)
+        return true
+    end
+    return false
 end
 
 --Handle a wired message
 function handleWired(freq, repfreq, message)
-if repfreq == 1 then
-local dec_message = coreUtils.Split(message,':')
-    if dec_message["succes"] then
-        if dec_message[0] == "message" then
-           data = textutils.unserialize(dec_message[1])
-           print("Incoming message from: "..data["sender"].." to "..data["host"])
-           if hosts[data["host"]] ~= nil then
-           modem_wireless.transmit(tonumber(hosts[data["host"]]["port"]),settings["ssid"],message)
-           else           
-           print(data["host"].." not found.")
-           end
+    if repfreq == 1 then
+        local result, data = pcall(textutils.unserialize, message)
+        if result then
+        modem_wireless.transmit(hosts[data["target"]],settings["ssid"],message)
+        if data["identifier"] == "network" and data["data"] == "false" then
+            removeHost(data["target"])
         end
-    else
-        print("Unexpected message: "..message)
+        else
+        print("ERROR: "..message)
     end
-end
+    end
 end
 
 --Handle a wireless message
 function handleWireless(freq, repfreq, message)
-local dec_message = coreUtils.Split(message,':')
-    if dec_message["succes"] then
-        if dec_message[0] == "login" then
-            local host_data = textutils.unserialize(dec_message[1])
-            local succes = login(modem_wired,host_data["name"])
-            if succes then
-                newHost(host_data)
-                print("New host: "..host_data["name"])
+   local result, data = pcall(textutils.unserialize, message)
+    if result then
+        if data["identifier"] == "network" then
+            if data["data"] == "login" then
+                modem_wired.transmit(1, settings["port"], message)               
             end
-                modem_wireless.transmit(repfreq,settings["ssid"],"handshake:"..tostring(succes))                
-        elseif dec_message[0] == "logout" then
-            local host_data = textutils.unserialize(dec_message[1])
-            local succes_local = removeHost(host_data)
-            local succes = logout(modem_wired,host_data["name"])
-            modem_wireless.transmit(repfreq,settings["ssid"],"handshake:"..tostring(succes))
-            if succes then        
-                print("Removing host: "..host_data["name"])
             else
-                print("Removing host: "..host_data["name"].." failed")
-            end
-            if not succes then
-                print("No response. Is DHCP offline?")
+            if table.contains(hosts,data["target"]) then
+            modem_wireless.transmit(hosts[data["target"]],1,message)
             else
-               print("Host removed from wired DHCP")
+            modem_wired.transmit(1,settings["port"],message)
             end
-        elseif dec_message[0] == "hosts" then
-            waiting = true
-            modem_wired.transmit(1,settings["port"],"hosts:")
-            while waiting do event, data = pullEvent() end
-            if event ~= "hosts" then
-            print("No response. Is DHCP offline?")
-            else
-            modem_wireless.transmit(repfreq,settings["ssid"],"hosts:"..data)
-            end
-        elseif dec_message[0] == "message" then
-            local data = textutils.unserialize(dec_message[1])
-            print("Incoming message from: "..data["sender"].." to "..data["host"])
-            if hosts[data["host"]] ~= nil then
-                modem_wireless.transmit(tonumber(hosts[data["host"]]["port"]),settings["ssid"],message)
-                modem_wireless.transmit(repfreq,settings["ssid"], "received:true")
-            else                
-                waiting = true
-                modem_wired.transmit(1,settings["port"],message)
-                while waiting do succes = pullEvent() end
-                modem_wireless.transmit(repfreq,settings["ssid"], "received:"..tostring(succes))
-            end    
-        end   
-    else
-        print("Unexpected message: "..message)
+            modem_wireless.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], "true"))
+        end
+        else
+        print("ERROR: "..message)
     end
 end
 
 --Main loop
 while true do
-local type_event, side, freq, repfreq, message, distance = os.pullEvent("modem_message")
-if side == settings["side_wired"] then handleWired(freq, repfreq, message) end
-if side == settings["side_wireless"] then handleWireless(freq, repfreq, message) end
+    local type_event, side, freq, repfreq, message, distance = os.pullEvent("modem_message")
+    if side == settings["side_wired"] then handleWired(freq, repfreq, message) end
+    if side == settings["side_wireless"] then handleWireless(freq, repfreq, message) end
 end
