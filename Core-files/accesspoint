@@ -36,7 +36,6 @@ function removeHost(hostname)
     if hosts[hostname] ~= nil then
         hosts[hostname] = nil
         print("Removed host: "..hostname)
-        return true
     end
     return false
 end
