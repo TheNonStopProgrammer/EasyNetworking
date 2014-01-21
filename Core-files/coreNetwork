@@ -44,10 +44,6 @@ if modem.isWireless() then
     end
 end
 
-function isValidIdentifier(identifier)
-    return identifier == "string" or identifier == "table" or identifier == "log" or identifier == "command" or identifier == "network"
-end
-
 function login()    
     if settings["hostname"] ~= nil then
         timerID = os.startTimer(2)
@@ -88,7 +84,7 @@ function getHosts()
 end
 
 function sendMessage(target, identifier, payload)
-    if loggedIN and isValidIdentifier(identifier) then
+    if loggedIN then
         timerID = os.startTimer(2)
         modem.transmit(dhcpPort,settings["port"],coreUtils.packetBuilder(identifier,target,settings["hostname"],payload))
         repeat
