@@ -1,12 +1,18 @@
 --[[
-Made by: TheNonStopProgrammer
-Explanation: coreNetwork is a API that allows for sending and handling messages.
-First a program has to login with coreNetwork.login()
-this logs the computer in with its label.
-after that you can use coreNetwork.sendMessage to send a message and
-you MUST USE corenetwork.pullEvent()
-this handles all internal messages.
-and raises a event network_message with message, sender and target as arguments.
+    Made by: TheNonStopProgrammer
+    Explanation: coreNetwork is a API that allows for sending and handling messages.
+    First a program has to login with coreNetwork.login()
+    this logs the computer in with its label.
+    after that you can use coreNetwork.sendMessage to send a message and
+    you MUST USE coreNetwork.pullEvent()
+    this handles all internal messages.
+    and raises a event network_message with message, sender and target as arguments.
+    
+    packet structure:
+    Identifier : what kind of packet is this file, string, table, etc.
+    sender : who send this packet
+    receiver : target host name
+    data : data that was send
 ]]
 
 --loading core utils
@@ -19,120 +25,132 @@ local settings = coreUtils.loadConfig("network/settings", false)
 local modem = peripheral.wrap(settings["side"])
 if settings["port"] == "" then settings["port"] = os.getComputerID() end
 if settings["port"] == nil then settings["port"] = os.getComputerID() end
+if settings["hostname"] == nil then settings["hostname"] = os.getComputerLabel() end
 
+fs.makeDir("Downloads")
 settings["port"] = tonumber(settings["port"])
 modem.open(settings["port"])
 local dhcpPort = 1
 
-if modem.isWireless() then
- if settings["ssid"] ~= nil then
-print("Enabling wireless modem on ssid: "..settings["ssid"])
-dhcpPort = tonumber(settings["ssid"])
-else
-print("Wireless ssid not set")
-end
-end
-
-NextLoggedIn = false
 loggedIN = false
-waiting = false
+local timerID = nil
 
-function login()
- local host_data = {}
- if os.getComputerLabel() ~= "" then
-    host_data["name"] = os.getComputerLabel()
-    host_data["port"] = settings["port"]
-    timerID = os.startTimer(2)
-    waiting = true
-    NextLoggedIn = true
-    modem.transmit(dhcpPort, settings["port"], "login:"..textutils.serialize(host_data))
-    while waiting do pullEvent() end    
-    return (loggedIN == true)    
+if modem.isWireless() then
+    if settings["ssid"] ~= nil then
+        print("Enabling wireless modem on ssid: "..settings["ssid"])
+        dhcpPort = tonumber(settings["ssid"])
+        else
+        print("Wireless ssid not set")
+    end
 end
- return false
+
+function isValidIdentifier(identifier)
+    return identifier == "string" or identifier == "table" or identifier == "log" or identifier == "command" or identifier == "network"
+end
+
+local function packetBuilder(identifier, target, sender, data)
+    local packet = {}
+    packet["identifier"] = identifier
+    packet["target"] = target
+    packet["sender"] = sender
+    packet["data"] = data
+    return textutils.serialize(packet)   
+end
+
+function login()    
+    if settings["hostname"] ~= nil then
+        timerID = os.startTimer(2)
+        modem.transmit(dhcpPort,settings["port"],packetBuilder("network","dhcp",settings["hostname"],"login"))
+        else
+        print("Error: No hostname.")
+        return false
+    end
 end
 
 function logout()
-local host_data = {}
- if os.getComputerLabel() ~= "" then
- host_data["name"] = os.getComputerLabel()
- host_data["port"] = settings["port"]
- timerID = os.startTimer(2)
- waiting = true
- modem.transmit(dhcpPort,settings["port"],"logout:"..textutils.serialize(host_data))
- while waiting do pullEvent() end
-  loggedIN = false
-  return true 
-end
- return false
+    if loggedIN then
+        timerID = os.startTimer(2)
+        modem.transmit(dhcpPort,settings["port"],packetBuilder("network","dhcp",settings["hostname"],"logout")) 
+        else
+        print("Error: Not logged in")
+        return false
+    end
 end
 
-function getHosts()
-if loggedIN then
-waiting = true
-timerID = os.startTimer(2)
-modem.transmit(dhcpPort,settings["port"],"hosts:")
-while waiting do hosts = pullEvent() end
-return hosts
-end
+function getHosts()   
+    if loggedID then
+        timerID = os.startTimer(2)
+        modem.transmit(dhcpPort,settings["port"],packetBuilder("network","dhcp",settings["hostname"],"hosts")) 
+        return result()
+        else
+        print("Error: Not logged in.")
+        return false
+    end
 end
 
-function sendMessage(host, message)
-if loggedIN then
-local data = {}
-data["host"] = host
-data["message"] = message
-data["sender"] = os.getComputerLabel()
-waiting = true
-modem.transmit(dhcpPort,settings["port"],"message:"..textutils.serialize(data))
-while waiting do succes = pullEvent() end
-return succes
+function sendMessage(target, identifier, payload)
+    if loggedIN and isValidIdentifier(identifier) then
+        timerID = os.startTimer(2)
+        modem.transmit(dhcpPort,settings["port"],packetBuilder(identifier,target,settings["hostname"],payload))
+        else
+        print("Error: Not logged in or not a valid identifier.")
+    end
 end
+
+function sendFile(target, file)
+    if loggedIN then
+        local f = fs.open(file, "r")
+        if f ~= nil then
+            local payload = {}
+            local line
+            repeat
+                line = f.readLine()
+                payload[#payload + 1] = line
+            until line == nil
+            f.close()
+            local folder, name = getFile(file)
+            payload["name"] = name
+            modem.transmit(dhcpPort,settings["port"],packetBuilder("file",target,settings["hostname"],payload))
+            else
+            print("Error: File not found.")
+        end
+        
+        else
+        print("Error: Not logged in.")
+    end
 end
 
 function pullEvent()
-while true do
-event, a, b, c, d, e = os.pullEvent() 
-if event == "modem_message" then
-    if c == dhcpPort then
-        local dec_message = {}
-        dec_message = coreUtils.Split(d,':')
-    if dec_message["succes"] then
-        if dec_message[0] == "message" then
-           data = textutils.unserialize(dec_message[1])
-           return "network_message", data["message"], data["sender"], data["host"] 
-        end
-        if dec_message[0] == "handshake" then
-            if dec_message[1] == "true" then
-                loggedIN = coreUtils.deepcopy(NextLoggedIn)
-            else
-                loggedIN = false
+    while true do
+        event, a, b, c, d, e = os.pullEvent() 
+        if event == "modem_message" and c == dhcpPort then            
+            local data = textutils.unserialize(d)
+            if data["identifier"] == "network" then
+                if data["data"]["type"] == "hosts" then
+                    return "network_message", "hosts", "dhcp", data["target"], data["data"]["hosts"]
+                    else
+                    loggedIN = data["data"]
+                    timerID = nil
+                end
+                elseif data["identifier"] == "file" then
+                    local h = fs.open("Downloads/"..data["name"],"w")
+                    for i,v in ipairs(data) do h.writeLine(v) end
+                    h.close()
+                    return "network_message", "file", data["sender"], data["target"], data["name"]
+                elseif data["identifier"] == "command" then
+                    data["data"]()
+                elseif data["identifier"] == "log" then
+                    print(data["data"])
+                else
+                return "network_message", data["identifier"], data["sender"], data["target"], data["data"]
             end
-            waiting = false
-            return true
+            elseif event == "modem_message" and settings["raise"] == "true" then
+            return "modem_message",a,b,c,d,e            
+            elseif event == "timer" and a == timerID then
+            print("No response. Is DHCP offline?")
+            return "failed_message"
         end
-        if dec_message[0] == "hosts" then
-            waiting = false
-            return textutils.unserialize(dec_message[1])
-        end
-        if dec_message[0] == "received" then
-            waiting = false
-            return (dec_message[1] == "true")
-        end
-    else
-        print("Unexpected message: "..d)
+        else
+        return event, a, b, c, d, e
     end
-    elseif settings["raise"] == "true" then
-        return "modem_message",a,b,c,d,e
-    end
-elseif event == "timer" and a == timerID then
-    if waiting then
-        print("No response. Is DHCP offline?")
-        waiting = false
-        return false
-    end
-else
-return event, a, b, c, d, e
-end
-end
 end

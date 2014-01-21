@@ -1,11 +1,11 @@
 --[[
-Made by: TheNonStopProgrammer
-Explanation: Network based install program.
-It will download the required files, update them when there is a update available and remove programs
-Usage:  apt-get install program_name (force)
-        apt-get update
-        apt-get remove program_name
-        the force parameter will download all the files even if they are already installed.
+    Made by: TheNonStopProgrammer
+    Explanation: Network based install program.
+    It will download the required files, update them when there is a update available and remove programs
+    Usage:  apt-get install program_name (force)
+    apt-get update
+    apt-get remove program_name
+    the force parameter will download all the files even if they are already installed.
 ]]
 function loadRepos()
     local f = assert(io.open("apt/sources", "r"))
