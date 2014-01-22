@@ -74,12 +74,16 @@ function getHosts()
     if loggedID then
         timerID = os.startTimer(2)
         modem.transmit(dhcpPort,settings["port"],coreUtils.packetBuilder("network","DHCP",settings["hostname"],"hosts")) 
+        local event, identifier, message
         repeat
-            pullEvent()
+            event, identifier, message = pullEvent()
         until timerID == nil
+        if event == "network_message" and identifier = "hosts" then
+        return message
+        end
         else
         print("Error: Not logged in.")
-        return false
+        return nil
     end
 end
 
@@ -124,8 +128,9 @@ function pullEvent()
         if event == "modem_message" and c == dhcpPort then            
             local data = textutils.unserialize(d)
             if data["identifier"] == "network" then
-                if data["data"]["type"] == "hosts" then
-                    return "network_message", "hosts", "DHCP", data["target"], data["data"]["hosts"]
+                if type(data["data"]) == "table" then
+                    timerID = nil
+                    return "network_message", "hosts", data["data"]
                     else
                     loggedIN = (data["data"] == "true")
                     timerID = nil
