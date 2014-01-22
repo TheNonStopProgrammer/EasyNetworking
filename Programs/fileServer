@@ -31,7 +31,7 @@ while true do
             elseif identifier == "list" then
             local payload = fs.list("public/"..message)
             for i,v in ipairs(payload) do 
-                if fs.isDir("public/"..message..v) then payload[i] = "/"..v end
+                if fs.isDir("public/"..message.."/"..v) then payload[i] = "/"..v end
             end
             table.sort(payload,switch)
             coreNetwork.sendMessage(sender, "list", payload)
