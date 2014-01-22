@@ -47,105 +47,7 @@ function isDir(name)
 end
 
 function handle()
-    if current_pos == 1 then
-        index = nil
-        for i=string.len(working_dir),1,-1 do
-            if string.sub(working_dir,i,i) == "/" then
-                index = i
-                break
-            end
-        end
-        if index ~= nil then
-            working_dir = string.sub(working_dir,1,index-1)
-            else
-            working_dir = ""
-        end
-        coreNetwork.sendMessage(input,"list",working_dir)
-        elseif current_pos == table.getn(list)-3 then
-        elseif current_pos == table.getn(list)-2 then
-        term.clear()
-        term.setCursorPos(1,1)
-        print("Folder name?")
-        local folder = read()
-        folder = working_dir.."/"..folder
-        if isDir(folder) then
-            folder = string.sub(folder,2)
-        end
-        coreNetwork.sendMessage(input,"makedir",folder)
-        coreNetwork.sendMessage(input,"list",working_dir)
-        elseif current_pos == table.getn(list)-1 then
-        term.clear()
-        term.setCursorPos(1,1)
-        print("Filename or type quit to return?")
-        local choice = nil
-        while choice == nil do
-            choice = read()
-            if choice == "quit" then
-                choice = nil
-                break
-            end
-            if not fs.exists(choice) or fs.isDir(choice) then
-                print("File does not exist.")
-                choice = nil
-            end
-        end
-        if choice ~= nil then
-            for i=string.len(choice),1,-1 do
-                if string.sub(choice,i,i) == "/" then
-                    index = i
-                    break
-                end
-            end
-            local file_upload = working_dir.."/"
-            if index ~= nil then
-                file_upload = file_upload..string.sub(choice,index+1)
-                else
-                file_upload = file_upload..choice
-            end            
-            if isDir(file_upload) then
-                file_upload = string.sub(file_upload,2)
-            end
-            print("Uploading file to "..file_upload)
-            coreNetwork.sendFile(input, choice)
-            sleep(1)
-            coreNetwork.sendMessage(input,"list",working_dir)
-        end
-        elseif isDir(list[current_pos]) then
-        working_dir = working_dir..list[current_pos]
-        if isDir(working_dir) then
-            working_dir = string.sub(working_dir,2)
-        end
-        coreNetwork.sendMessage(input,"list",working_dir)
-        else
-        local file = working_dir..list[current_pos]
-        if isDir(file) then
-            file = string.sub(file,2)
-        end
-        term.clear()
-        term.setCursorPos(1,1)
-        local file = working_dir..list[current_pos]
-        while file_download == nil do
-            print("Destination folder?")
-            file_download = read()
-            if not fs.isDir(file_download) then
-                print("Folder does not exist. Create it? [y,n]")
-                local choice = read()
-                if choice == "y" or choice == "yes" then
-                    fs.makeDir(file_download)
-                    else
-                    file_download = nil
-                end
-            end
-        end
-        file_download = file_download.."/"..list[current_pos]
-        if isDir(file_download) then
-            file_download = string.sub(file_download,2)
-        end
-        print("Getting: "..file)
-        print("Saving to: "..file_download)
-        sleep(1)
-        coreNetwork.sendMessage(input,"get",file)
-    end
+    
 end
 
 while true do
@@ -154,15 +56,13 @@ while true do
     if event == "mouse_scroll" then
         current_pos = current_pos + identifier
         elseif event == "key" then
-        if identifier == 200 then
-            current_pos = current_pos - 1
-            elseif identifier == 208 then
-            current_pos = current_pos + 1
+        if identifier == 200 then current_pos = current_pos - 1
+            elseif identifier == 208 then current_pos = current_pos + 1
             elseif identifier == 211 then
             term.clear()
             term.setCursorPos(1,1)
             local file = working_dir..list[current_pos]
-            if isDir(file) then
+            if isDir(file) then 
                 file = string.sub(file,2)
             end
             print("Sure you want to delete "..file.."? [y/n]")
@@ -181,11 +81,11 @@ while true do
         elseif event == "network_message" and sender == input then
         if identifier == "list" then
             list = coreUtils.deepcopy(message)
-        elseif identifier == "file" then
+            elseif identifier == "file" then
 			term.setCursorPos(1,1)
 			term.clear()
 			print("File received")
-		end
+        end
     end
     table.insert(list,1,"..")
     list[#list+1] = "---- Options ----"
