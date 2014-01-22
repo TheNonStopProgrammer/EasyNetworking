@@ -4,6 +4,7 @@ Explanation: Simple script that shows the hosts that are online, more of a demo 
 ]]
 os.loadAPI("coreNetwork")
 coreNetwork.login()
+sleep(1)
 local hosts = coreNetwork.getHosts()
 if hosts ~= nil then
 for key,value in pairs(hosts) do print(value) end

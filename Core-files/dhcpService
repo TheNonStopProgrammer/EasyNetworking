@@ -49,7 +49,7 @@ while true do
                 elseif data["data"] == "logout" then
                 modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], tostring(removeHost(data["sender"],replyChannel))))
                 elseif data["data"] == "hosts" then
-                modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], hosts)
+                modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], hosts))
                 print("Sending hosts to "..data["sender"])
                 end
             else
