@@ -97,6 +97,10 @@ function installAP()
         comPort = os.getComputerID()
     end
     f:write("channel="..tonumber(comPort))
+    f:write("/SSID for wireless connection\n")
+    print("Wireless SSID? (Leave blank for no SSID)")
+    comPort = read()
+    f:write("ssid="..comPort)
     f:close()
     print("Copying files.")
     if fs.exists("accesspoint") then fs.delete("accesspoint") end
