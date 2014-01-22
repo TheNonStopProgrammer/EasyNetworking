@@ -37,8 +37,6 @@ if side ~= nil then
     downloadFile("applications/fileBrowser",dropbox.."Programs/fileBrowser")
     downloadFile("applications/fileServer",dropbox.."Programs/fileServer")
     downloadFile("applications/getHosts",dropbox.."Programs/getHosts")
-    downloadFile("applications/receiveMessage",dropbox.."Programs/receiveMessage")
-    downloadFile("applications/sendMessage",dropbox.."Programs/sendMessage")
     downloadFile("applications/repo",dropbox.."Programs/repo")
     downloadFile("applications/apt-get",dropbox.."Programs/apt-get")    
     print("Done, disk is ready for use")
