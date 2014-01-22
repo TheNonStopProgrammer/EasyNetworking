@@ -1,19 +1,16 @@
 print("Finding networks in your area..")
 --loading core utils
-os.loadAPI("coreUtils")
-
---loading config in network folder
-local settings = coreUtils.loadConfig("network/settings", false)
 
 --setting up modem
-local modem = peripheral.wrap(settings["side"])
-if settings["port"] == "" then settings["port"] = os.getComputerID() end
-if settings["port"] == nil then settings["port"] = os.getComputerID() end
-if settings["hostname"] == nil then settings["hostname"] = os.getComputerLabel() end
 
-settings["port"] = tonumber(settings["port"])
-modem.open(settings["port"])
-local dhcpPort = 1
+local sides = { "front", "back", "left", "right", "top","bottom"}
+local modem
+for i,v in pairs(sides) do
+    if peripheral.getType(v) == "modem" then
+        modem = peripheral.wrap(v)
+        break
+    end
+end
 
 if modem.isWireless() then
     modem.transmit(1,settings["port"],"ping")
