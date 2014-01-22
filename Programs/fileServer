@@ -41,7 +41,11 @@ while true do
 			elseif identifier == "remove" then
 			fs.delete("public/"..message)
 			elseif identifier == "file" then
-			fs.move("Downloads/"..message,"public/"..fileMessage.."/"..message)
+			local folder = ""
+            if fileMessage ~= nil then
+                folder = fileMessage.."/"
+            end
+            fs.move("Downloads/"..message,"public/"..folder..message)
 			else
 			print("ERROR: "..message)
         end        
