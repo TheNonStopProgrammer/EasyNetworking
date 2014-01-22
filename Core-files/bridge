@@ -18,10 +18,10 @@ hosts = {}
 local modem_wired = peripheral.wrap(settings["side_wired"])
 local modem_wireless = peripheral.wrap(settings["side_wireless"])
 settings["port"] = tonumber(settings["port"])
-settings["ssid"] = tonumber(settings["ssid"])
+settings["channel"] = tonumber(settings["channel"])
 modem_wired.open(1)
 modem_wireless.open(tonumber(settings["port"]))
-print("Bridge communicating with ssid: "..tostring(settings["ssid"]))
+print("Bridge communicating with channel: "..tostring(settings["channel"]))
 
 --Add host to the table
 function newHost(hostname, port)
@@ -45,7 +45,7 @@ end
 
 --Handle wireless message
 function handleWireless(freq, repfreq, message)
-     if repfreq == settings["ssid"] then
+     if repfreq == settings["channel"] then
         local result, data = pcall(textutils.unserialize, message)
         if result then
         modem_wired.transmit(hosts[data["target"]],1,message)
@@ -66,12 +66,12 @@ function handleWired(freq, repfreq, message)
             if data["data"] == "login" then                
                 newHost(data["sender"],repfreq)               
             end
-            modem_wireless.transmit(settings["ssid"], settings["port"], message)
+            modem_wireless.transmit(settings["channel"], settings["port"], message)
             else
             if table.contains(hosts,data["target"]) then
             modem_wired.transmit(hosts[data["target"]],1,message)
             else
-            modem_wireless.transmit(settings["ssid"],settings["port"],message)
+            modem_wireless.transmit(settings["channel"],settings["port"],message)
             end
             modem_wired.transmit(repfreq, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], "true"))
         end

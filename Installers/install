@@ -90,13 +90,13 @@ function installAP()
         comPort = os.getComputerID()
     end
     f:write("port="..tonumber(comPort).."\n")
-    f:write("/SSID for wireless connection\n")
-    print("Wireless SSID number(default: computerID")
+    f:write("/Channel for wireless connection\n")
+    print("Wireless channel number(default: computerID")
     comPort = read()
     if comPort == "" then
         comPort = os.getComputerID()
     end
-    f:write("ssid="..tonumber(comPort))
+    f:write("channel="..tonumber(comPort))
     f:close()
     print("Copying files.")
     if fs.exists("accesspoint") then fs.delete("accesspoint") end
@@ -147,13 +147,13 @@ function installBridge()
         comPort = os.getComputerID()
     end
     f:write("port="..tonumber(comPort).."\n")
-    f:write("/SSID for wireless connection\n")
-    print("Wireless SSID number?")
+    f:write("/channel for wireless connection\n")
+    print("Wireless channel number?")
     comPort = nil
     if comPort == nil then
         comPort = tonumber(read())
     end
-    f:write("ssid="..tonumber(comPort))
+    f:write("channel="..tonumber(comPort))
     f:close()
     print("Copying files.")
     if fs.exists("bridge") then fs.delete("bridge") end
@@ -187,19 +187,19 @@ function installClient()
     side = detectModem(true)
     if side ~= nil then
         f:write("side="..side.."\n")
-        f:write("/SSID for wireless connection\n")
-        f:write("ssid=\n")
+        f:write("/channel for wireless connection\n")
+        f:write("channel=\n")
         else
         side = detectModem(false)
         if side ~= nil then
             f:write("side="..side.."\n")
-            print("Wireless ssid number?")
+            print("Wireless channel number?")
             input = nil
             while input == nil do
                 input = read()
             end
-            f:write("/SSID for wireless connection\n")
-            f:write("ssid="..tonumber(input).."\n")
+            f:write("/channel for wireless connection\n")
+            f:write("channel="..tonumber(input).."\n")
             else
             side = nil
             while not isValidSide(side) do
@@ -207,13 +207,13 @@ function installClient()
                 side = read()
             end
             f:write("side="..side.."\n")
-            print("Wireless ssid number?")
+            print("Wireless channel number?")
             input = nil
             while input == nil do
                 input = read()
             end
-            f:write("/SSID for wireless connection\n")
-            f:write("ssid="..tonumber(input))
+            f:write("/channel for wireless connection\n")
+            f:write("channel="..tonumber(input))
         end
     end
     f:write("/Port for com between this device and hdcp\n")

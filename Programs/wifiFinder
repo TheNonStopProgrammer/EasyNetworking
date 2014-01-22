@@ -1,0 +1,32 @@
+print("Finding networks in your area..")
+--loading core utils
+os.loadAPI("coreUtils")
+
+--loading config in network folder
+local settings = coreUtils.loadConfig("network/settings", false)
+
+--setting up modem
+local modem = peripheral.wrap(settings["side"])
+if settings["port"] == "" then settings["port"] = os.getComputerID() end
+if settings["port"] == nil then settings["port"] = os.getComputerID() end
+if settings["hostname"] == nil then settings["hostname"] = os.getComputerLabel() end
+
+settings["port"] = tonumber(settings["port"])
+modem.open(settings["port"])
+local dhcpPort = 1
+
+if modem.isWireless() then
+    modem.transmit(1,settings["port"],"ping")
+    os.startTimer(5)
+    print("SSID     Channel      Distance")
+    repeat
+        local event, event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent()
+        if event == "modem_message" then
+            print(message.." "..replyChannel.." "..senderDistance)
+        end
+    until event == "timer"
+    else
+    print("Not using a wireless modem, No point in using this program dum dum.")
+end
+
+os.startTimer(5)

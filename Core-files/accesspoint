@@ -7,7 +7,7 @@
 os.loadAPI("coreUtils")
 local settings = coreUtils.loadConfig("network/settings", true)
 if settings["port"] == "" then settings["port"] = os.getComputerID() end
-if settings["ssid"] == "" then settings["ssid"] = os.getComputerID() end
+if settings["channel"] == "" then settings["channel"] = os.getComputerID() end
 local hosts = {}
 
 --Accespoint wireless spoofs a hdcp server
@@ -17,10 +17,11 @@ local hosts = {}
 local modem_wired = peripheral.wrap(settings["side_wired"])
 local modem_wireless = peripheral.wrap(settings["side_wireless"])
 settings["port"] = tonumber(settings["port"])
-settings["ssid"] = tonumber(settings["ssid"])
+settings["channel"] = tonumber(settings["channel"])
 modem_wired.open(settings["port"])
-modem_wireless.open(settings["ssid"])
-print("Wireless accespoint ssid: "..settings["ssid"])
+modem_wireless.open(1)
+modem_wireless.open(settings["channel"])
+print("Wireless accespoint channel: "..settings["channel"])
 
 --Add host to the table
 function newHost(hostname, port)
@@ -45,7 +46,7 @@ function handleWired(freq, repfreq, message)
     if repfreq == 1 then
         local result, data = pcall(textutils.unserialize, message)
         if result then
-        modem_wireless.transmit(hosts[data["target"]],settings["ssid"],message)
+        modem_wireless.transmit(hosts[data["target"]],settings["channel"],message)
         if data["identifier"] == "network" and data["data"] == "false" then
             removeHost(data["target"])
         end
@@ -66,11 +67,11 @@ function handleWireless(freq, repfreq, message)
             modem_wired.transmit(1, settings["port"], message)
             else
             if table.contains(hosts,data["target"]) then
-            modem_wireless.transmit(hosts[data["target"]],1,message)
+            modem_wireless.transmit(hosts[data["target"]],settings["channel"],message)
             else
             modem_wired.transmit(1,settings["port"],message)
             end
-            modem_wireless.transmit(repfreq, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], "true"))
+            modem_wireless.transmit(repfreq, settings["channel"], coreUtils.packetBuilder("network", data["sender"], data["target"], "true"))
         end
         else
         print("ERROR: "..message)
@@ -81,5 +82,11 @@ end
 while true do
     local type_event, side, freq, repfreq, message, distance = os.pullEvent("modem_message")
     if side == settings["side_wired"] then handleWired(freq, repfreq, message) end
-    if side == settings["side_wireless"] then handleWireless(freq, repfreq, message) end
+    if side == settings["side_wireless"] then 
+    if freq ~= 1 then
+    handleWireless(freq, repfreq, message) 
+    elseif settings["ssid"] ~= nil and settings["ssid"] ~= ""
+    modem_wireless.transmit(repfreq,settings["channel"],settings["ssid"])
+    end
+    end
 end

@@ -36,11 +36,11 @@ loggedIN = false
 local timerID = nil
 
 if modem.isWireless() then
-    if settings["ssid"] ~= nil then
-        print("Enabling wireless modem on ssid: "..settings["ssid"])
-        dhcpPort = tonumber(settings["ssid"])
+    if settings["channel"] ~= nil then
+        print("Enabling wireless modem on channel: "..settings["channel"])
+        dhcpPort = tonumber(settings["channel"])
         else
-        print("Wireless ssid not set")
+        print("Wireless channel not set")
     end
 end
 
@@ -172,6 +172,6 @@ function getComPort()
 return settings["port"]
 end
 
-function getSSID()
-return settings["ssid"]
+function getChannel()
+return settings["channel"]
 end
