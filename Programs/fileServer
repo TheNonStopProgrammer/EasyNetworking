@@ -33,6 +33,7 @@ while true do
             for i,v in ipairs(payload) do 
                 if fs.isDir("public/"..message..v) then payload[i] = "/"..v end
             end
+            table.sort(payload,switch)
             coreNetwork.sendMessage(sender, "list", payload)
             elseif identifier == "makedir" then
             fs.makeDir("public/"..message)
