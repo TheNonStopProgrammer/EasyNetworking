@@ -24,7 +24,7 @@ if not fs.exists("public") then fs.makeDir("public") end
 print("File server running. Name: "..coreNetwork.getHostname())
 
 while true do
-    event, identifier, sender, target, message = coreNetwork.pullEvent()
+    event, identifier, sender, target, message, fileMessage = coreNetwork.pullEvent()
     if event == "network_message" then
         if identifier == "get" then            
             coreNetwork.sendFile(sender, "public/"..message,"download")
@@ -41,7 +41,7 @@ while true do
 			elseif identifier == "remove" then
 			fs.delete("public/"..message)
 			elseif identifier == "file" then
-			
+			fs.move("Downloads/"..message,"public/"..fileMessage.."/"..message)
 			else
 			print("ERROR: "..message)
         end        

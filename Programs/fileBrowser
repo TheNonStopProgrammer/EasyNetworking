@@ -53,7 +53,15 @@ function handle()
         working_dir,_ = coreUtils.getFile(working_dir)
         coreNetwork.sendMessage(input,"list",working_dir)
         elseif current_pos == #list-1 then --Upload a file
-            
+            term.clear()
+            term.setCursorPos(1,1)
+            print("File location?")
+            local fileName = read()
+            if fileName ~= nil then
+                if fs.exists(fileName) and not fs.isDir(fileName) then
+                    coreNetwork.sendFile(input,fileName,working_dir)
+                end
+            end
         elseif current_pos == #list-2 then --Make a directory
             term.clear()
             term.setCursorPos(1,1)
@@ -73,7 +81,7 @@ function handle()
 end
 
 while true do
-    local event, identifier, sender, target, message = coreNetwork.pullEvent()
+    local event, identifier, sender, target, message, fileMessage = coreNetwork.pullEvent()
     if event == "mouse_scroll" then
         current_pos = current_pos + identifier
         elseif event == "key" then
@@ -112,6 +120,7 @@ while true do
         term.setCursorPos(1,1)
         term.clear()
         print("File received")
+        sleep(2)
         end
     end
     current_pos = math.max(1,current_pos)

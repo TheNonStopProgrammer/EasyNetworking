@@ -135,7 +135,7 @@ function pullEvent()
                 local h = fs.open("Downloads/"..data["data"]["name"],"w")
                 for i,v in ipairs(data["data"]) do h.writeLine(v) end
                 h.close()
-                return "network_message", "file", data["sender"], data["target"], data["data"]["name"]
+            return "network_message", "file", data["sender"], data["target"], data["data"]["name"], data["data"]["message"]
                 elseif data["identifier"] == "command" then
                 x = loadstring(data["data"])()
                 elseif data["identifier"] == "log" then
