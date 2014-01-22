@@ -73,7 +73,7 @@ function handle()
             print("Folder name?")
             local folderName = read()
             if folderName ~= nil and folderName ~= "" then
-            coreNetwork.sendMessage(input,"makedir",working_dir..folderName)
+            coreNetwork.sendMessage(input,"makedir",working_dir.."/"..folderName)
             end
             coreNetwork.sendMessage(input,"list",working_dir)
             draw()
