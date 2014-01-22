@@ -106,7 +106,7 @@ function sendFile(target, file, message)
                 payload[#payload + 1] = line
             until line == nil
             f.close()
-            local folder, name = getFile(file)
+            local folder, name = coreUtils.getFile(file)
             payload["name"] = name
 			payload["message"] = message
             modem.transmit(dhcpPort,settings["port"],coreUtils.packetBuilder("file",target,settings["hostname"],payload))

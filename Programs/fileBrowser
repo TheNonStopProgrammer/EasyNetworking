@@ -50,7 +50,7 @@ end
 
 function handle()
     if current_pos == 1 then --The back folder option
-        _,working_dir = coreUtils.getFile(working_dir)
+        working_dir,_ = coreUtils.getFile(working_dir)
         coreNetwork.sendMessage(input,"list",working_dir)
         elseif current_pos == #list-1 then --Upload a file
             
@@ -63,7 +63,7 @@ function handle()
             end
             draw()
         elseif current_pos < #list-3 then --File or folder selected
-        if isDir(list[current_pos] then
+        if isDir(list[current_pos]) then
             working_dir = working_dir..list[current_pos]
             coreNetwork.sendMessage(input,"list",working_dir)
             else
