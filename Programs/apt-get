@@ -58,23 +58,23 @@ if fs.exists("apt/sources") then
         for i,v in ipairs(repos) do
             os.startTimer(2)
             coreNetwork.sendMessage(v,"install",args[2])
-            local event, message, sender, target = nil
-            while sender ~= repos[i] do 
+            local event, identifier, message, sender, target = nil
+            repeat
                 event, identifier, sender, target, message = coreNetwork.pullEvent()
-            end
+            until sender == v or event == "timer"
             if event == "network_message" then
                 if identifier == "nope" then
                     break
                     else
                     print("Install the following files? [y/n]")
-                    for i,v in ipairs(message} do
+                    for i,v in ipairs(message) do
                         if not table.contains(programs,v) or args[3] == "force" then
                             print(v)
                         end
                     end
                     local choice = read()
                     if choice == "y" or choice == "Y" then
-                        for index,value in ipairs(message} do --download the file train
+                        for index,value in ipairs(message) do --download the file train
                             coreNetwork.sendMessage(v,"get",value)
                             repeat
                                 event, identifier, sender, target, message, fileMessage = coreNetwork.pullEvent()
@@ -86,62 +86,64 @@ if fs.exists("apt/sources") then
                             programs[message]["folder"]=fileMessage["folder"]
                         end
                     end
-                    elseif  event == "timer" then
-                    print("No response from repo: "..v)
-                    break
                 end
+                elseif  event == "timer" then
+                print("No response from repo: "..v)
+                break
             end
-            elseif args[1] == "update" then
-            local file_found = false
-            for index, value in pairs(programs) do
-                file_found = false
-                for _, repo in ipairs(repos) do
-                    local update_packet = {}
-                    update_packet["name"] = index
-                    update_packet["version"] = value
-                    local event, message, sender = nil
-                    os.startTimer(2)
-                    repeat
-                        coreNetwork.sendMessage(repo,"update",update_packet)                    
-                        event, identifier, sender, target, message, fileMessage = coreNetwork.pullEvent()           
-                    until event == "timer" or sender == repo
-                    if event == "network_message" then
-                        if identifier == "update" then
-                            print(index.." up to date.")
-                            file_found = true
-                            elseif identifier == "file" then
-                            print("New version "..value.." found, downloading")
-                            fs.delete(fileMessage["folder"]..message)
-                            fs.move("Downloads/"..message,fileMessage["folder"]..message)
-                            programs[message]["version"]=fileMessage["version"]
-                            programs[message]["folder"]=fileMessage["folder"]
-                            changed = true
-                            file_found = true
-                            else
-                            --file is not on this repo ):
-                            --More luck next time
-                        end
-                    end
-                    
-                end
-                if not file_found then
-                    print(value.." was not found on any repo.")
-                end
-            end
-            elseif args[1] == "list" then
-            print("Listing programs.")
-            for i,v in pairs(programs) do
-                print(i)
-            end
-            elseif args[1] == "remove" and programs[args[2]] ~= nil then
-            fs.delete(programs[args[2]]["folder"]..args[2])
-            programs[args[2]] = nil
-            print(args[2].." removed.")
-            else
-            print("Not a valid option.")
+            
         end
-        coreNetwork.logout()
-        if changed then savePrograms(programs) end
+        elseif args[1] == "update" then
+        local file_found = false
+        for index, value in pairs(programs) do
+            file_found = false
+            for _, repo in ipairs(repos) do
+                local update_packet = {}
+                update_packet["name"] = index
+                update_packet["version"] = value
+                local event, message, sender = nil
+                os.startTimer(2)
+                repeat
+                coreNetwork.sendMessage(repo,"update",update_packet)                    
+                event, identifier, sender, target, message, fileMessage = coreNetwork.pullEvent()           
+                until event == "timer" or sender == repo
+                if event == "network_message" then
+                    if identifier == "update" then
+                        print(index.." up to date.")
+                        file_found = true
+                        elseif identifier == "file" then
+                        print("New version "..value.." found, downloading")
+                        fs.delete(fileMessage["folder"]..message)
+                        fs.move("Downloads/"..message,fileMessage["folder"]..message)
+                        programs[message]["version"]=fileMessage["version"]
+                        programs[message]["folder"]=fileMessage["folder"]
+                        changed = true
+                        file_found = true
+                        else
+                        --file is not on this repo ):
+                        --More luck next time
+                    end
+                end
+                
+            end
+            if not file_found then
+                print(value.." was not found on any repo.")
+            end
+        end
+        elseif args[1] == "list" then
+        print("Listing programs.")
+        for i,v in pairs(programs) do
+            print(i)
+        end
+        elseif args[1] == "remove" and programs[args[2]] ~= nil then
+        fs.delete(programs[args[2]]["folder"]..args[2])
+        programs[args[2]] = nil
+        print(args[2].." removed.")
         else
-        print("apt/sources doesnt not exist. Can't contact repo's")
-    end            
+        print("Not a valid option.")
+    end
+    coreNetwork.logout()
+    if changed then savePrograms(programs) end
+    else
+    print("apt/sources doesnt not exist. Can't contact repo's")
+end            

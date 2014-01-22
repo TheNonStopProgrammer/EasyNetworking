@@ -180,16 +180,15 @@ while true do
             end
             elseif identifier == "install" then
             local data = {}
-            if table.contains(myPrograms, temp["name"]) then
-                data["has"] = true
+            if table.contains(myPrograms, message) then
                 local deps = {}
-                deps[1] = temp["name"]
-                addDeps(temp["name"],deps)
-                data["files"] = deps
+                deps[1] = message
+                addDeps(message,deps)
+                coreNetwork.sendMessage(sender,"install",deps)
                 else
-                data["has"] = false
+                coreNetwork.sendMessage(sender,"nope","nope")
             end
-            coreNetwork.sendMessage(sender,textutils.serialize(data))
+            
             else
             print("not a valid input received")
         end
