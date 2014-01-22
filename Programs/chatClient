@@ -11,7 +11,7 @@ respons = false
 while not respons do
     print("Chat server name?")
     server = read()
-    coreNetwork.sendMessage(server,"join:")
+    coreNetwork.sendMessage(server,"join","join")
     timerID = os.startTimer(2)
     while true do
     event, message, sender = coreNetwork.pullEvent()
@@ -29,13 +29,13 @@ event,a,b,c,d,e = coreNetwork.pullEvent()
 if event == "key" then
 message = read()
 if message ~= nil and message ~= "quit" and message ~= "list" then
-coreNetwork.sendMessage(server,"text:"..message)
+coreNetwork.sendMessage(server,"text",message)
 elseif message == "list" then
-coreNetwork.sendMessage(server,"list:")
+coreNetwork.sendMessage(server,"list")
 end
 end
 if(event == "network_message") then
-print(a)
+print(d)
 end
 end
 

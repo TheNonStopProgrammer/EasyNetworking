@@ -7,13 +7,13 @@ coreNetwork.login()
 term.clear()
 term.setCursorPos(1,1)
 print("Chatserver starting.")
-print("Chatroom name: "..os.getComputerLabel())
+print("Chatroom name: "..coreNetwork.getHostname())
 local list = {}
 
 function broadcastMessage(mess,sender)
  for key,value in pairs(list) do
 if value ~= sender then
-coreNetwork.sendMessage(value,mess)
+coreNetwork.sendMessage(value,"message",mess)
 end
 end 
 end
@@ -28,22 +28,21 @@ function table.contains(table, element)
 end
  
 while true do
-    local event, a,b,c = coreNetwork.pullEvent()
+    local event, identifier, sender, target, message = coreNetwork.pullEvent()
    if event == "network_message" then
         -- a is the message
         -- b is the sender
         -- c is the destination
-        dec_message = coreUtils.Split(a,":")
-        if dec_message[0] == "join" then
+        if identifier == "join" then
             if not table.contains(list, b) then
-            table.insert(list,1,b)
+            table.insert(list,1,sender)
             end
-            coreNetwork.sendMessage(b,"joined")
-            broadcastMessage(b.." joined.",b)
-            print(b.." Joined")
-        elseif dec_message[0] == "leave" then
-            broadcastMessage(b.." left.",b)
-            print(b.." Left")
+            coreNetwork.sendMessage(sender,"joined","joined")
+            broadcastMessage(sender.." joined.",sender)
+            print(sender.." Joined")
+        elseif identifier == "leave" then
+            broadcastMessage(sender.." left.",sender)
+            print(sender.." Left")
             repeat
             key = nil
             for index,value in pairs(list) do                
@@ -55,11 +54,11 @@ while true do
             table.remove(list,key)   
             end
             until key == nil
-        elseif dec_message[0] == "text" then
-            broadcastMessage(b..": "..dec_message[1],b)
-        elseif dec_message[0] == "list" then
+        elseif identifier == "text" then
+            broadcastMessage(sender..": "..message,sender)
+        elseif identifier == "list" then
             for key,value in pairs(list) do
-               coreNetwork.sendMessage(b,value)
+               coreNetwork.sendMessage(sender,"user",value)
         end
     end
 end
