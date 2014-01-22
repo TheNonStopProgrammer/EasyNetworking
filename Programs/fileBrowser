@@ -93,9 +93,11 @@ while true do
             elseif identifier == 211 then
             term.clear()
             term.setCursorPos(1,1)
-            local file = working_dir..list[current_pos]
-            if isDir(file) then 
-                file = string.sub(file,2)
+            local file
+            if isDir(list[current_pos]) then
+            file = working_dir..list[current_pos]
+            else 
+            file = working_dir.."/"..list[current_pos]
             end
             print("Sure you want to delete "..file.."? [y/n]")
             local choice = read()

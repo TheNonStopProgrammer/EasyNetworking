@@ -55,7 +55,7 @@ while true do
                 modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], payload))
                 end
             else
-            if(hosts[data["target"]] ~= nil then
+            if hosts[data["target"]] ~= nil then
             modem.transmit(hosts[data["target"]],1,message)
             end
             modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], "true"))
