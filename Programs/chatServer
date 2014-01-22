@@ -60,6 +60,7 @@ while true do
             for key,value in pairs(list) do
                coreNetwork.sendMessage(sender,"user",value)
         end
+        coreNetwork.sendMessage(sender,"user","----------")
     end
 end
 end

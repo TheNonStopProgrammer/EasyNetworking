@@ -31,6 +31,7 @@ message = read()
 if message ~= nil and message ~= "quit" and message ~= "list" then
 coreNetwork.sendMessage(server,"text",message)
 elseif message == "list" then
+print("Listing online users.")
 coreNetwork.sendMessage(server,"list")
 end
 end
