@@ -150,6 +150,7 @@ end
 
 while true do
     local event, identifier, sender, target, message = coreNetwork.pullEvent()
+    list = {}
     if event == "mouse_scroll" then
         current_pos = current_pos + identifier
         elseif event == "key" then
