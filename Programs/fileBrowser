@@ -62,6 +62,7 @@ function handle()
                 if fs.exists(fileName) and not fs.isDir(fileName) then
                     print(fileName)
                     print(working_dir)
+                    sleep(2)
                     coreNetwork.sendFile(input,fileName,working_dir)
                 end
             end
