@@ -20,13 +20,14 @@ os.loadAPI("coreNetwork")
 coreNetwork.login()
 
 if not fs.exists("public") then fs.makeDir("public") end
-print("File server running. Name: "..os.getComputerLabel())
+
+print("File server running. Name: "..coreNetwork.getHostname())
 
 while true do
     event, identifier, sender, target, message = coreNetwork.pullEvent()
     if event == "network_message" then
         if identifier == "get" then            
-            coreNetwork.sendFile(sender, "public/"..message)
+            coreNetwork.sendFile(sender, "public/"..message,"download")
             elseif identifier == "list" then
             local payload = fs.list("public/"..message)
             coreNetwork.sendMessage(sender, "list", payload)
@@ -34,6 +35,12 @@ while true do
             fs.makeDir("public/"..message)
             elseif identifier == "hello" then
             coreNetwork.sendMessage(sender, "hi", "hi")
+			elseif identifier == "remove" then
+			fs.delete("public/"..message)
+			elseif identifier == "file" then
+			
+			else
+			print("ERROR: "..message)
         end        
     end
 end

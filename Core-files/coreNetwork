@@ -95,7 +95,7 @@ function sendMessage(target, identifier, payload)
     end
 end
 
-function sendFile(target, file)
+function sendFile(target, file, message)
     if loggedIN then
         local f = fs.open(file, "r")
         if f ~= nil then
@@ -108,11 +108,11 @@ function sendFile(target, file)
             f.close()
             local folder, name = getFile(file)
             payload["name"] = name
+			payload["message"] = message
             modem.transmit(dhcpPort,settings["port"],coreUtils.packetBuilder("file",target,settings["hostname"],payload))
             else
             print("Error: File not found.")
-        end
-        
+        end        
         else
         print("Error: Not logged in.")
     end
@@ -153,4 +153,20 @@ function pullEvent()
             return event, a, b, c, d, e
         end
     end
+end
+
+function isLoggedIN()
+return loggedIN
+end
+
+function getHostname()
+return settings["hostname"]
+end
+
+function getComPort()
+return settings["port"]
+end
+
+function getSSID()
+return settings["ssid"]
 end

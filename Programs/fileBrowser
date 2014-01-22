@@ -77,17 +77,8 @@ function handle()
             if isDir(file_upload) then
                 file_upload = string.sub(file_upload,2)
             end
-            local data = {}
-            local f = io.open(choice,"r")
-            for line in f:lines() do
-                table.insert(data,line)
-            end
-            f:close()
             print("Uploading file to "..file_upload)
-            local packet = {}
-            packet["name"] = file_upload
-            packet["data"] = textutils.serialize(data)
-            coreNetwork.sendMessage(input, "post",textutils.serialize(packet))
+            coreNetwork.sendFile(input, choice)
             sleep(1)
             coreNetwork.sendMessage(input,"list",working_dir)
         end
@@ -135,25 +126,23 @@ term.clear()
 term.setCursorPos(1,1)
 file_download = nil
 print("Fileserver name: ")
-input = nil
+local input = nil
 
 while input == nil do
     input = read()
     coreNetwork.sendMessage(input,"hello","hello")
     os.startTimer(2)
-    event = nil
     repeat
         local event, identifier, sender, target, message = coreNetwork.pullEvent()
-        if event == "network_message" and identifier ~= "hi" then input = nil end
         if event == "timer" then input = nil end
     until (event == "network_message" and identifier == "hi") or event == "timer"
 end
 
 working_dir = ""
 local x,y = term.getSize()
-range_min = 1
-range_max = y-1
-current_pos = 1
+local range_min = 1
+local range_max = y-1
+local current_pos = 1
 coreNetwork.sendMessage(input,"list",working_dir)
 local list = {}
 
@@ -180,24 +169,28 @@ while true do
                 coreNetwork.sendMessage(input,"list",working_dir)
             end
             elseif identifier == 28 then
-            if current_pos == table.getn(list) then break
+            if current_pos == #list then break
             else handle() end
         end
         elseif event == "mouse_click" then
-        if current_pos == table.getn(list) then break
+        if current_pos == #list then break
         else handle() end
         elseif event == "network_message" and sender == input then
         if identifier == "list" then
             list = coreUtils.deepcopy(message)
-        end
+        elseif if identifier == "file" then
+			term.setCursorPos(1,1)
+			term.clear()
+			print("File received")
+		end
     end
     table.insert(list,1,"..")
-    list[table.getn(list)+1] = "---- Options ----"
-    list[table.getn(list)+1] = "Make a directory"
-    list[table.getn(list)+1] = "Upload a file"
-    list[table.getn(list)+1] = "Quit file browser"    
+    list[#list+1] = "---- Options ----"
+    list[#list+1] = "Make a directory"
+    list[#list+1] = "Upload a file"
+    list[#list+1] = "Quit file browser"    
     current_pos = math.max(1,current_pos)
-    current_pos = math.min(current_pos,table.getn(list))
+    current_pos = math.min(current_pos,#list)
     if range_min > current_pos then
         range_min = range_min - 1 
         range_max = range_max - 1
