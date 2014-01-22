@@ -12,12 +12,14 @@ for i,v in pairs(sides) do
     end
 end
 
+if modem ~= nil then
+    modem.open(2)
 if modem.isWireless() then
-    modem.transmit(1,settings["port"],"ping")
+    modem.transmit(1,2,"ping")
     os.startTimer(5)
     print("SSID     Channel      Distance")
     repeat
-        local event, event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent()
+        local event, modemSide, senderChannel, replyChannel, message, senderDistance = os.pullEvent()
         if event == "modem_message" then
             print(message.." "..replyChannel.." "..senderDistance)
         end
@@ -26,4 +28,4 @@ if modem.isWireless() then
     print("Not using a wireless modem, No point in using this program dum dum.")
 end
 
-os.startTimer(5)
+end
