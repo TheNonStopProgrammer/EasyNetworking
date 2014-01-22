@@ -195,9 +195,9 @@ while true do
         end
     end
     if event == "key" then --n = 49, u == 22
-        if message == 49 then handleNew() end
-        if message == 22 then handleUpdate() end
-        if message == 38 then
+        if identifier == 49 then handleNew() end
+        if identifier == 22 then handleUpdate() end
+        if identifier == 38 then
             for i,v in ipairs(myPrograms) do print(v) end
         end
     end
