@@ -3,8 +3,8 @@ Made by: TheNonStopProgrammer
 Explanation: Script that makes a computer the default repo.
 ]]
 print("Setting up repo..")
-print("The easiest way is to set the name of the main repo server to 'repo'")
-print("Other names  have to be added to the apt/sources file")
+print("The easiest way is to set the hostname of the main repo to 'repo'")
+print("Other names  have to be added to the apt/sources file on each client.")
 print("starting the installer..")
 sleep(5)
 shell.run("disk/install","client")
