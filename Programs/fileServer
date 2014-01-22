@@ -30,6 +30,9 @@ while true do
             coreNetwork.sendFile(sender, "public/"..message,"download")
             elseif identifier == "list" then
             local payload = fs.list("public/"..message)
+            for i,v in ipairs(payload) do 
+                if fs.isDir(v) then payload[i] = "/"..v end
+            end
             coreNetwork.sendMessage(sender, "list", payload)
             elseif identifier == "makedir" then
             fs.makeDir("public/"..message)
