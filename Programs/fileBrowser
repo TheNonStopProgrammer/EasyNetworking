@@ -2,6 +2,34 @@
     Made by: TheNonStopProgrammer
     Explanation: Used for browsing on a fileServer
 ]]
+
+os.loadAPI("coreNetwork")
+coreNetwork.login()
+term.clear()
+term.setCursorPos(1,1)
+file_download = nil
+print("Fileserver name: ")
+local input = nil
+
+while input == nil do
+    input = read()
+    coreNetwork.sendMessage(input,"hello","hello")
+    os.startTimer(2)
+    repeat
+        local event, identifier, sender, target, message = coreNetwork.pullEvent()
+        if event == "timer" then input = nil end
+    until (event == "network_message" and identifier == "hi") or event == "timer"
+end
+
+working_dir = ""
+local x,y = term.getSize()
+local range_min = 1
+local range_max = y-1
+local current_pos = 1
+coreNetwork.sendMessage(input,"list",working_dir)
+local list = {}
+
+
 function draw()
     term.clear()
     term.setCursorPos(1,1)
@@ -120,32 +148,6 @@ function handle()
     end
 end
 
-os.loadAPI("coreNetwork")
-coreNetwork.login()
-term.clear()
-term.setCursorPos(1,1)
-file_download = nil
-print("Fileserver name: ")
-local input = nil
-
-while input == nil do
-    input = read()
-    coreNetwork.sendMessage(input,"hello","hello")
-    os.startTimer(2)
-    repeat
-        local event, identifier, sender, target, message = coreNetwork.pullEvent()
-        if event == "timer" then input = nil end
-    until (event == "network_message" and identifier == "hi") or event == "timer"
-end
-
-working_dir = ""
-local x,y = term.getSize()
-local range_min = 1
-local range_max = y-1
-local current_pos = 1
-coreNetwork.sendMessage(input,"list",working_dir)
-local list = {}
-
 while true do
     local event, identifier, sender, target, message = coreNetwork.pullEvent()
     if event == "mouse_scroll" then
@@ -178,7 +180,7 @@ while true do
         elseif event == "network_message" and sender == input then
         if identifier == "list" then
             list = coreUtils.deepcopy(message)
-        elseif if identifier == "file" then
+        elseif identifier == "file" then
 			term.setCursorPos(1,1)
 			term.clear()
 			print("File received")
