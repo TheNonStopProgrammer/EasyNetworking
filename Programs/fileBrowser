@@ -31,10 +31,11 @@ local list = {}
 
 
 function draw()
+    
     term.clear()
     term.setCursorPos(1,1)
     for i=range_min,range_max do 
-        if current_pos == i then
+        if current_pos == i and list[i] ~= nil then
             print(">"..list[i])
             else
             print(list[i]) 
