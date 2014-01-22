@@ -53,13 +53,14 @@ while true do
                 payload["type"] = "hosts"
                 payloac["hosts"] = hosts
                 modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], payload))
-                
-            end
+                end
             else
+            if(hosts[data["target"]] ~= nil then
             modem.transmit(hosts[data["target"]],1,message)
+            end
             modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], "true"))
-        end
+            end
         else
         print("ERROR: "..message)
     end
-end
+    end
