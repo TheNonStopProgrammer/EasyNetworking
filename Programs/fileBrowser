@@ -96,6 +96,7 @@ while true do
             local file
             if isDir(list[current_pos]) then
             file = working_dir..list[current_pos]
+            if isDir(file) then file = string.sub(file,2) end
             else 
             file = working_dir.."/"..list[current_pos]
             end
