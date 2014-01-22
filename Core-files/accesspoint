@@ -85,7 +85,7 @@ while true do
     if side == settings["side_wireless"] then 
     if freq ~= 1 then
     handleWireless(freq, repfreq, message) 
-    elseif settings["ssid"] ~= nil and settings["ssid"] ~= ""
+    elseif settings["ssid"] ~= nil and settings["ssid"] ~= "" then
     modem_wireless.transmit(repfreq,settings["channel"],settings["ssid"])
     end
     end
