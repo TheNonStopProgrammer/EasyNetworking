@@ -49,7 +49,27 @@ function isDir(name)
 end
 
 function handle()
-    
+    if current_pos == 1 then --The back folder option
+        _,working_dir = coreUtils.getFile(working_dir)
+        coreNetwork.sendMessage(input,"list",working_dir)
+        elseif current_pos == #list-1 then --Upload a file
+            
+        elseif current_pos == #list-2 then --Make a directory
+            term.clear()
+            term.setCursorPos(1,1)
+            local folderName = read()
+            if folderName ~= nil and folderName ~= "" then
+            coreNetwork.sendMessage(input,"makedir",working_dir..folderName)
+            end
+            draw()
+        elseif current_pos < #list-3 then --File or folder selected
+        if isDir(list[current_pos] then
+            working_dir = working_dir..list[current_pos]
+            coreNetwork.sendMessage(input,"list",working_dir)
+            else
+            coreNetwork.sendMessage(input,"get",working_dir.."/"..list[current_pos])
+            end       
+    end
 end
 
 while true do
@@ -62,19 +82,19 @@ while true do
             elseif identifier == 211 then
             term.clear()
             term.setCursorPos(1,1)
-        local file = working_dir..list[current_pos]
-        if isDir(file) then 
-            file = string.sub(file,2)
-        end
-        print("Sure you want to delete "..file.."? [y/n]")
-        local choice = read()
-        if choice == "y" or choice == "yes" then
-            coreNetwork.sendMessage(input,"del",file)
-            coreNetwork.sendMessage(input,"list",working_dir)
-        end
-        elseif identifier == 28 then
-        if current_pos == #list then break
-        else handle() end
+            local file = working_dir..list[current_pos]
+            if isDir(file) then 
+                file = string.sub(file,2)
+            end
+            print("Sure you want to delete "..file.."? [y/n]")
+            local choice = read()
+            if choice == "y" or choice == "yes" then
+                coreNetwork.sendMessage(input,"del",file)
+                coreNetwork.sendMessage(input,"list",working_dir)
+            end
+            elseif identifier == 28 then
+            if current_pos == #list then break
+            else handle() end
         end
         elseif event == "mouse_click" then
         if current_pos == #list then break
@@ -85,13 +105,13 @@ while true do
             list = coreUtils.deepcopy(message)
             table.insert(list,1,"..")
             list[#list+1] = "---- Options ----"
-            list[#list+1] = "Make a directory"
-            list[#list+1] = "Upload a file"
-            list[#list+1] = "Quit file browser"    
-            elseif identifier == "file" then
-			term.setCursorPos(1,1)
-			term.clear()
-			print("File received")
+        list[#list+1] = "Make a directory"
+        list[#list+1] = "Upload a file"
+        list[#list+1] = "Quit file browser"    
+        elseif identifier == "file" then
+        term.setCursorPos(1,1)
+        term.clear()
+        print("File received")
         end
     end
     current_pos = math.max(1,current_pos)
