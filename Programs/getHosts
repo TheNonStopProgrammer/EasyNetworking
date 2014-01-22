@@ -4,6 +4,12 @@ Explanation: Simple script that shows the hosts that are online, more of a demo 
 ]]
 os.loadAPI("coreNetwork")
 coreNetwork.login()
-hosts = coreNetwork.getHosts()
-for key,value in pairs(hosts) do print(value["name"]) end
+local event, identifier, sender, target, message
+os.startTimer(2)
+repeat
+event, identifier, sender, target, message = coreNetwork.pullEvent()
+until event == "timer" or identifier == "hosts"
+if identifier == "hosts" then
+for key,value in pairs(message) do print(value["name"]) end
+end
 coreNetwork.logout()
