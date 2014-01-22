@@ -52,7 +52,7 @@ function handle()
     if isDir(working_dir) then working_dir = string.sub(working_dir,2) end
     if current_pos == 1 then --The back folder option
         working_dir,_ = coreUtils.getFile(working_dir)
-        if string.sub(working_dir,string.len(working_dir)) == "/" then working_dir = string.sub(working_dir,1,string_len(working_dir)-1) end
+        if string.sub(working_dir,string.len(working_dir)) == "/" then working_dir = string.sub(working_dir,1,string.len(working_dir)-1) end
         coreNetwork.sendMessage(input,"list",working_dir)
         elseif current_pos == #list-1 then --Upload a file
             term.clear()

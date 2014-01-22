@@ -50,133 +50,98 @@ if not fs.isDir("apt") then fs.makeDir("apt") end
 if fs.exists("apt/sources") then
     local repos = loadRepos()
     local programs = {}
-    programs["programs"] = {}
-    programs["version"] = {}
     local changed = false
     if fs.exists("apt/programs") then
         programs = loadPrograms()
     end    
     if args[1] == "install" and args[2] ~= nil then
-        local install_packet = {}        
-        install_packet["option"] = "hasFile"
-        install_packet["name"] = args[2]
-        for i = 1, table.getn(repos) do
+        for i,v in ipairs(repos) do
             os.startTimer(2)
-            coreNetwork.sendMessage(repos[i],textutils.serialize(install_packet))
+            coreNetwork.sendMessage(v,"install",args[2])
             local event, message, sender, target = nil
             while sender ~= repos[i] do 
-                event, message, sender, target = coreNetwork.pullEvent()
+                event, identifier, sender, target, message = coreNetwork.pullEvent()
             end
             if event == "network_message" then
-                local output = textutils.unserialize(message)
-                if output["has"] then
-                    print("These files will be installed.")
-                    for i,v in ipairs(output["files"]) do
-                        if not table.contains(programs["programs"],v) or args[3] == "force" then print(v) end
-                    end
-                    print("Are you sure? (y/n)")            
-                    local choice = read()
-                    if choice == "y" or choice == "Y" then
-                        for j,v in ipairs(output["files"]) do
-                            if not table.contains(programs["programs"],v) or args[3] == "force" then
-                                local get_packet = {}
-                                get_packet["option"] = "get"
-                                get_packet["name"] = v
-                                local data = {}
-                                repeat
-                                    coreNetwork.sendMessage(repos[i],textutils.serialize(get_packet))
-                                    repeat
-                                        event, message, sender, target = coreNetwork.pullEvent("network_message")                            
-                                    until sender == repos[i]
-                                    data = textutils.unserialize(message)
-                                until data["succes"]
-                                print("Received "..v)
-                                local f = assert(io.open(v,"w"))
-                                for _,value in ipairs(data["program"]) do 
-                                    f:write(value.."\n") 
-                                end
-                                f:close()
-                                if not table.contains(programs["programs"],v) then 
-                                    programs["programs"][#programs["programs"]+1] = v 
-                                    programs["version"][#programs["programs"]] = data["version"]
-                                    changed = true
-                                    else
-                                    for index,value in ipairs(programs["programs"]) do
-                                        if value == v then
-                                            programs["programs"][index] = v
-                                            programs["version"][index] = data["version"]
-                                            changed = true
-                                        end
-                                    end
-                                end                            
-                                sleep(1)
-                            end
+                if identifier == "nope" then
+                    break
+                    else
+                    print("Install the following files? [y/n]")
+                    for i,v in ipairs(message} do
+                        if not table.contains(programs,v) or args[3] == "force" then
+                            print(v)
                         end
                     end
-                end
-                elseif  event == "timer" then
-                break
-            end
-        end
-        elseif args[1] == "update" then
-        local file_found = false
-        for index, value in ipairs(programs["programs"]) do
-            file_found = false
-            for _, repo in ipairs(repos) do
-                local update_packet = {}
-                update_packet["option"] = "update"
-                update_packet["name"] = value
-                update_packet["version"] = programs["version"][index]
-                local event, message, sender = nil
-                os.startTimer(2)
-                repeat
-                    coreNetwork.sendMessage(repo,textutils.serialize(update_packet))                    
-                    event, message, sender = coreNetwork.pullEvent()           
-                until event == "timer" or sender == repo
-                if event == "network_message" then
-                    local temp = textutils.unserialize(message)
-                    if temp["result"] == "Most recent version." then
-                        print(value.." up to date.")
-                        file_found = true
-                        elseif temp["result"] == "New version" then
-                        print("New version "..value.." found, downloading")
-                        local file = fs.open(value,"w")
-                        for o,line in ipairs(temp["program"]) do fs.writeLine(line) end
-                        file.close()
-                        file_found = true
-                        programs["version"][index] = temp["version"]
-                        changed = true
-                        else
-                        --file is not on this repo ):
-                        --More luck next time
+                    local choice = read()
+                    if choice == "y" or choice == "Y" then
+                        for index,value in ipairs(message} do --download the file train
+                            coreNetwork.sendMessage(v,"get",value)
+                            repeat
+                                event, identifier, sender, target, message, fileMessage = coreNetwork.pullEvent()
+                            until event == "network_message" and identifier == "file"
+                            fs.delete(fileMessage["folder"]..message)
+                            fs.move("Downloads/"..message,fileMessage["folder"]..message)
+                            programs[message]= {}
+                            programs[message]["version"]=fileMessage["version"]
+                            programs[message]["folder"]=fileMessage["folder"]
+                        end
                     end
+                    elseif  event == "timer" then
+                    print("No response from repo: "..v)
+                    break
                 end
-                
             end
-            if not file_found then
-                print(value.." was not found on any repo.")
+            elseif args[1] == "update" then
+            local file_found = false
+            for index, value in pairs(programs) do
+                file_found = false
+                for _, repo in ipairs(repos) do
+                    local update_packet = {}
+                    update_packet["name"] = index
+                    update_packet["version"] = value
+                    local event, message, sender = nil
+                    os.startTimer(2)
+                    repeat
+                        coreNetwork.sendMessage(repo,"update",update_packet)                    
+                        event, identifier, sender, target, message, fileMessage = coreNetwork.pullEvent()           
+                    until event == "timer" or sender == repo
+                    if event == "network_message" then
+                        if identifier == "update" then
+                            print(index.." up to date.")
+                            file_found = true
+                            elseif identifier == "file" then
+                            print("New version "..value.." found, downloading")
+                            fs.delete(fileMessage["folder"]..message)
+                            fs.move("Downloads/"..message,fileMessage["folder"]..message)
+                            programs[message]["version"]=fileMessage["version"]
+                            programs[message]["folder"]=fileMessage["folder"]
+                            changed = true
+                            file_found = true
+                            else
+                            --file is not on this repo ):
+                            --More luck next time
+                        end
+                    end
+                    
+                end
+                if not file_found then
+                    print(value.." was not found on any repo.")
+                end
             end
-        end
-        elseif args[1] == "list" then
-        print("Listing programs.")
-        for i,v in ipairs(programs["programs"]) do
-            print(v)
-        end
-        elseif args[1] == "remove" and table.contains(programs["programs"],args[2]) then
-        fs.delete(args[2])
-        for i,v in ipairs(programs["programs"]) do
-            if v == args[2] then
-                table.remove(programs["programs"],i)
-                table.remove(programs["version"],i)
-                changed = true
+            elseif args[1] == "list" then
+            print("Listing programs.")
+            for i,v in pairs(programs) do
+                print(i)
             end
+            elseif args[1] == "remove" and programs[args[2]] ~= nil then
+            fs.delete(programs[args[2]]["folder"]..args[2])
+            programs[args[2]] = nil
+            print(args[2].." removed.")
+            else
+            print("Not a valid option.")
         end
-        print(args[2].." removed.")
+        coreNetwork.logout()
+        if changed then savePrograms(programs) end
         else
-        print("Not a valid option.")
-    end
-    coreNetwork.logout()
-    if changed then savePrograms(programs) end
-    else
-    print("apt/sources doesnt not exist. Can't contact repo's")
-end        
+        print("apt/sources doesnt not exist. Can't contact repo's")
+    end            
