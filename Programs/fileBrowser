@@ -30,8 +30,7 @@ coreNetwork.sendMessage(input,"list",working_dir)
 local list = {}
 
 
-function draw()
-    
+function draw()    
     term.clear()
     term.setCursorPos(1,1)
     for i=range_min,range_max do 
