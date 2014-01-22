@@ -79,6 +79,7 @@ if fs.exists("apt/sources") then
                             repeat
                                 event, identifier, sender, target, message, fileMessage = coreNetwork.pullEvent()
                             until event == "network_message" and identifier == "file"
+                            if not fs.exists(fileMessage["folder"]) than fs.makeDir(fileMessage["folder"]) end
                             fs.delete(fileMessage["folder"]..message)
                             fs.move("Downloads/"..message,fileMessage["folder"]..message)
                             programs[message]= {}
@@ -113,6 +114,7 @@ if fs.exists("apt/sources") then
                         file_found = true
                         elseif identifier == "file" then
                         print("New version "..value.." found, downloading")
+                        if not fs.exists(fileMessage["folder"]) than fs.makeDir(fileMessage["folder"]) end
                         fs.delete(fileMessage["folder"]..message)
                         fs.move("Downloads/"..message,fileMessage["folder"]..message)
                         programs[message]["version"]=fileMessage["version"]
