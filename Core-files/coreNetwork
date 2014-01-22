@@ -71,7 +71,7 @@ function logout()
 end
 
 function getHosts()   
-    if loggedID then
+    if loggedIN then
         timerID = os.startTimer(2)
         modem.transmit(dhcpPort,settings["port"],coreUtils.packetBuilder("network","DHCP",settings["hostname"],"hosts")) 
         local event, identifier, message
