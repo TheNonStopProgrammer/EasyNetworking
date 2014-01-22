@@ -150,7 +150,7 @@ coreNetwork.login()
 
 if not fs.exists("programs") then fs.makeDir("programs") end
 if not fs.exists("install") then fs.makeDir("install") end
-print("Repo server running. Name: "..os.getComputerLabel())
+print("Repo server running. Name: "..coreNetwork.getHostname())
 myPrograms = buildProgram()
 print("Programs loaded: "..table.getn(myPrograms))
 print("Server is running, press n for a new program, press u to update a program or l for the list programs")
