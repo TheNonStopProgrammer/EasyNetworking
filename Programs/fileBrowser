@@ -103,7 +103,7 @@ while true do
             print("Sure you want to delete "..file.."? [y/n]")
             local choice = read()
             if choice == "y" or choice == "yes" then
-                coreNetwork.sendMessage(input,"del",file)
+                coreNetwork.sendMessage(input,"remove",file)
                 coreNetwork.sendMessage(input,"list",working_dir)
             end
             elseif identifier == 28 then
