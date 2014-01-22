@@ -78,7 +78,7 @@ function getHosts()
         repeat
             event, identifier, message = pullEvent()
         until timerID == nil
-        if event == "network_message" and identifier = "hosts" then
+        if event == "network_message" and identifier == "hosts" then
         return message
         end
         else
