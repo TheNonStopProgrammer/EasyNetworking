@@ -49,6 +49,7 @@ function isDir(name)
 end
 
 function handle()
+    if isDir(working_dir) then working_dir = string.sub(working_dir) end
     if current_pos == 1 then --The back folder option
         working_dir,_ = coreUtils.getFile(working_dir)
         coreNetwork.sendMessage(input,"list",working_dir)
@@ -59,6 +60,8 @@ function handle()
             local fileName = read()
             if fileName ~= nil then
                 if fs.exists(fileName) and not fs.isDir(fileName) then
+                    print(fileName)
+                    print(working_dir)
                     coreNetwork.sendFile(input,fileName,working_dir)
                 end
             end
