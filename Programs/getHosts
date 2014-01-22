@@ -9,7 +9,7 @@ os.startTimer(2)
 repeat
 event, identifier, sender, target, message = coreNetwork.pullEvent()
 until event == "timer" or identifier == "hosts"
-if identifier == "hosts" then
+if identifier == "network" then
 for key,value in pairs(message) do print(value["name"]) end
 end
 coreNetwork.logout()

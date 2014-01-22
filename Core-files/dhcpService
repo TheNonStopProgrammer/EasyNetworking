@@ -53,6 +53,7 @@ while true do
                 payload["type"] = "hosts"
                 payloac["hosts"] = hosts
                 modem.transmit(replyChannel, 1, coreUtils.packetBuilder("network", data["sender"], data["target"], payload))
+                print("Sending hosts to "..data["sender"])
                 end
             else
             if hosts[data["target"]] ~= nil then
