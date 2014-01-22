@@ -139,7 +139,7 @@ function addDeps(program, tabel)
 end
 
 function loadInstallFile(filename)
-    local h = fs.open("install/"..filename)
+    local h = fs.open("install/"..filename,"r")
     local data = textutils.unserialize(h.readLine())
     h.close()
     return data
