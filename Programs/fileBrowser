@@ -33,11 +33,13 @@ local list = {}
 function draw()    
     term.clear()
     term.setCursorPos(1,1)
-    for i=range_min,range_max do 
-        if current_pos == i and list[i] ~= nil then
-            print(">"..list[i])
-            else
-            print(list[i]) 
+    for i=range_min,range_max do
+        if list[i] ~= nil then
+            if current_pos == i then
+                print(">"..list[i])
+                else
+                print(list[i]) 
+            end
         end
     end
 end
@@ -60,19 +62,19 @@ while true do
             elseif identifier == 211 then
             term.clear()
             term.setCursorPos(1,1)
-            local file = working_dir..list[current_pos]
-            if isDir(file) then 
-                file = string.sub(file,2)
-            end
-            print("Sure you want to delete "..file.."? [y/n]")
-            local choice = read()
-            if choice == "y" or choice == "yes" then
-                coreNetwork.sendMessage(input,"del",file)
-                coreNetwork.sendMessage(input,"list",working_dir)
-            end
-            elseif identifier == 28 then
-            if current_pos == #list then break
-            else handle() end
+        local file = working_dir..list[current_pos]
+        if isDir(file) then 
+            file = string.sub(file,2)
+        end
+        print("Sure you want to delete "..file.."? [y/n]")
+        local choice = read()
+        if choice == "y" or choice == "yes" then
+            coreNetwork.sendMessage(input,"del",file)
+            coreNetwork.sendMessage(input,"list",working_dir)
+        end
+        elseif identifier == 28 then
+        if current_pos == #list then break
+        else handle() end
         end
         elseif event == "mouse_click" then
         if current_pos == #list then break
