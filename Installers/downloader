@@ -39,7 +39,7 @@ if side ~= nil then
     downloadFile("applications/getHosts",dropbox.."Programs/getHosts")
     downloadFile("applications/repo",dropbox.."Programs/repo")
     downloadFile("applications/apt-get",dropbox.."Programs/apt-get")
-    ownloadFile("wifiFinder",dropbox.."Programs/wifiFinder")  
+    downloadFile("wifiFinder",dropbox.."Programs/wifiFinder")  
     print("Done, disk is ready for use")
     print("Use disk/install to start the program")
     print("Use disk/basic_client to install the basic client.")
