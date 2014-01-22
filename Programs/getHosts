@@ -7,6 +7,6 @@ coreNetwork.login()
 sleep(1)
 local hosts = coreNetwork.getHosts()
 if hosts ~= nil then
-for key,value in pairs(hosts) do print(value) end
+for key,value in pairs(hosts) do print(key) end
 end
 coreNetwork.logout()
