@@ -62,13 +62,16 @@ function handle()
                     coreNetwork.sendFile(input,fileName,working_dir)
                 end
             end
+            coreNetwork.sendMessage(input,"list",working_dir)
         elseif current_pos == #list-2 then --Make a directory
             term.clear()
             term.setCursorPos(1,1)
+            print("Folder name?")
             local folderName = read()
             if folderName ~= nil and folderName ~= "" then
             coreNetwork.sendMessage(input,"makedir",working_dir..folderName)
             end
+            coreNetwork.sendMessage(input,"list",working_dir)
             draw()
         elseif current_pos < #list-3 then --File or folder selected
         if isDir(list[current_pos]) then
