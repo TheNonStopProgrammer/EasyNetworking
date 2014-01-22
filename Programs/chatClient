@@ -40,5 +40,5 @@ print(d)
 end
 end
 
-coreNetwork.sendMessage(server,"leave:")
+coreNetwork.sendMessage(server,"leave","leave")
 coreNetwork.logout()
