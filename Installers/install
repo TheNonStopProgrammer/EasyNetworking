@@ -96,7 +96,7 @@ function installAP()
     if comPort == "" then
         comPort = os.getComputerID()
     end
-    f:write("channel="..tonumber(comPort))
+    f:write("channel="..tonumber(comPort).."\n")
     f:write("/SSID for wireless connection\n")
     print("Wireless SSID? (Leave blank for no SSID)")
     comPort = read()

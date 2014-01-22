@@ -38,11 +38,13 @@ if side ~= nil then
     downloadFile("applications/fileServer",dropbox.."Programs/fileServer")
     downloadFile("applications/getHosts",dropbox.."Programs/getHosts")
     downloadFile("applications/repo",dropbox.."Programs/repo")
-    downloadFile("applications/apt-get",dropbox.."Programs/apt-get")    
+    downloadFile("applications/apt-get",dropbox.."Programs/apt-get")
+    ownloadFile("wifiFinder",dropbox.."Programs/wifiFinder")  
     print("Done, disk is ready for use")
     print("Use disk/install to start the program")
     print("Use disk/basic_client to install the basic client.")
     print("Use disk/auto_repo to set up a repo server.")
+    print("Use disk/wifiFinder to find wireless network in the area.")
     else
     print("No disk was found.")
 end
